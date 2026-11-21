@@ -1,0 +1,1 @@
+int minigame2_sample();

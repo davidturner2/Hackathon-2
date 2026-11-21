@@ -1,0 +1,8 @@
+[
+  {
+    "label": "Build and Run",
+    "command": "cmake --build build && ./build/main",
+    "tags": ["cpp-main"],
+    "reveal": "always",
+  },
+]

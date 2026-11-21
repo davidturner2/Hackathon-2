@@ -1,4 +1,5 @@
 // headers here ...
+#include "main.h"
 
 int main() {
 
@@ -8,6 +9,7 @@ int main() {
 
      ***/
 
+  // minigame2_sample();
 
 
     return 0;

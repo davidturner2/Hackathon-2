@@ -1,0 +1,61 @@
+// headers here ...
+#include "raylib.h"
+#include <vector>
+
+using namespace std;
+
+const int MINIGAME_START_X = 100;
+const int MINIGAME_START_Y = 100;
+const int PLUG_WIDTH = 50;
+const int PLUG_HEIGHT = 30;
+const int GRID_SIZE = 70;
+
+const int ROWS = 5;
+const int COLOUMNS = 5;
+
+// Previously we used some math to check if the wire was on the left or right
+// side of the grid, or top or bottom. We decided to use an enum since it can
+// easily represent what side the plug is on and make future math more clear:
+// For example we had something like:
+// int CalculateYInGrid(int row, int offset) {
+//     return row*GRID_SIZE + (GRID_SIZE-PLUG_HEIGHT)*(row != 0) + offset;
+// }
+// Where (row != 0) would check if the plug was on top (row == 0), which would
+// align the plug with the top of the cell, and other wise would align it at the
+// bottom of the cell for anything else. And given each row only has two plugs
+// it could only be top of bottom aligned. Initially wanted to only use concepts
+// learned in class, but it got very un-readable :)
+enum Side { SIDE_TOP, SIDE_BOTTOM, SIDE_LEFT, SIDE_RIGHT };
+
+class Plug {
+public:
+  int row;
+  int coloumn;
+  Side side;
+  Rectangle GetPlugRect() const;
+  Vector2 GetWireAnchor() const;
+  Plug(int newRow, int newColoumn, Side newSide);
+};
+
+class Wire {
+public:
+  unsigned int plugIndex1;
+  unsigned int plugIndex2;
+  Wire(unsigned int newPlugIndex1, unsigned int newPlugIndex2);
+};
+
+class Plugs {
+public:
+  int rows;
+  int coloumns;
+  vector<Plug> plugs;
+  vector<Wire> wires;
+
+  void GeneratePlugs();
+  void GenerateWires();
+  Plugs(int newRows, int newColoumns);
+};
+
+void DrawGrid();
+void DrawPlugs(Plugs plugs);
+void DrawWires(Plugs plugs);
