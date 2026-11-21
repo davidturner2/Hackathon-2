@@ -11,7 +11,7 @@ int minigame2_sample() {
   InitWindow(1000, 800, "Minigame 2 Sample");
   SetTargetFPS(30);
 
-  Plugs plugs = Plugs(ROWS, COLOUMNS);
+  Plugs plugs = Plugs(ROWS, COLUMNS);
   plugs.GeneratePlugs();
   plugs.GenerateWires();
 

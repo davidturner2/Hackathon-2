@@ -1,15 +1,15 @@
 #include "header.h"
 
-Plug::Plug(int newRow, int newColoumn, Side newSide) {
+Plug::Plug(int newRow, int newColumn, Side newSide) {
   row = newRow;
-  coloumn = newColoumn;
+  column = newColumn;
   side = newSide;
 }
 
 // Get the rectangle that represents the plug's position and size on the screen
 Rectangle Plug::GetPlugRect() const {
   // The plug rectangle's cell left side
-  float cellX = MINIGAME_START_X + coloumn * GRID_SIZE;
+  float cellX = MINIGAME_START_X + column * GRID_SIZE;
   // The plug rectangle's cell top side
   float cellY = MINIGAME_START_Y + row * GRID_SIZE;
   // Center the plug rectangle in the cell on its longest side
@@ -19,14 +19,14 @@ Rectangle Plug::GetPlugRect() const {
 
   switch (side) {
   case SIDE_TOP:
-    return Rectangle{cellX + centered, cellY, PLUG_WIDTH, PLUG_HEIGHT};
+    return Rectangle{cellX + centered, cellY, static_cast<float>(PLUG_WIDTH), static_cast<float>(PLUG_HEIGHT)};
   case SIDE_BOTTOM:
-    return Rectangle{cellX + centered, cellY + pushed, PLUG_WIDTH, PLUG_HEIGHT};
+    return Rectangle{cellX + centered, cellY + pushed, static_cast<float>(PLUG_WIDTH), static_cast<float>(PLUG_HEIGHT)};
   case SIDE_LEFT:
-    return Rectangle{cellX, cellY + centered, PLUG_HEIGHT, PLUG_WIDTH};
+    return Rectangle{cellX, cellY + centered, static_cast<float>(PLUG_HEIGHT), static_cast<float>(PLUG_WIDTH)};
 
   default:
-    return Rectangle{cellX + pushed, cellY + centered, PLUG_HEIGHT, PLUG_WIDTH};
+    return Rectangle{cellX + pushed, cellY + centered, static_cast<float>(PLUG_HEIGHT), static_cast<float>(PLUG_WIDTH)};
   }
 }
 

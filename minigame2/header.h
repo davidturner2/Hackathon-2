@@ -4,14 +4,20 @@
 
 using namespace std;
 
-const int MINIGAME_START_X = 100;
-const int MINIGAME_START_Y = 100;
-const int PLUG_WIDTH = 50;
-const int PLUG_HEIGHT = 30;
-const int GRID_SIZE = 70;
+inline int MINIGAME_START_X = 100;
+inline int MINIGAME_START_Y = 100;
+inline int PLUG_WIDTH = 50;
+inline int PLUG_HEIGHT = 30;
+inline int GRID_SIZE = 70;
 
-const int ROWS = 5;
-const int COLOUMNS = 5;
+inline int ROWS = 5;
+inline int COLUMNS = 5;
+
+inline int setup(int rows, int columns) {
+  ROWS = rows;
+  COLUMNS = columns;
+  return 0;
+}
 
 // Previously we used some math to check if the wire was on the left or right
 // side of the grid, or top or bottom. We decided to use an enum since it can
@@ -30,11 +36,11 @@ enum Side { SIDE_TOP, SIDE_BOTTOM, SIDE_LEFT, SIDE_RIGHT };
 class Plug {
 public:
   int row;
-  int coloumn;
+  int column;
   Side side;
   Rectangle GetPlugRect() const;
   Vector2 GetWireAnchor() const;
-  Plug(int newRow, int newColoumn, Side newSide);
+  Plug(int newRow, int newColumn, Side newSide);
 };
 
 class Wire {
@@ -47,13 +53,13 @@ public:
 class Plugs {
 public:
   int rows;
-  int coloumns;
+  int columns;
   vector<Plug> plugs;
   vector<Wire> wires;
 
   void GeneratePlugs();
   void GenerateWires();
-  Plugs(int newRows, int newColoumns);
+  Plugs(int newRows, int newColumns);
 };
 
 void DrawGrid();

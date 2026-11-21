@@ -1,19 +1,19 @@
 #include "header.h"
 #include <cstdlib>
 
-Plugs::Plugs(int newRows, int newColoumns) {
+Plugs::Plugs(int newRows, int newColumns) {
   rows = newRows;
-  coloumns = newColoumns;
+  columns = newColumns;
 }
 
 void Plugs::GeneratePlugs() {
   plugs.clear();
-  // cout << "rows: " << rows << ", columns: " << coloumns << endl;
+  // cout << "rows: " << rows << ", columns: " << columns << endl;
   for (int i = 1; i < rows - 1; i++) {
     plugs.push_back(Plug(i, 0, SIDE_LEFT));
-    plugs.push_back(Plug(i, coloumns - 1, SIDE_RIGHT));
+    plugs.push_back(Plug(i, columns - 1, SIDE_RIGHT));
   }
-  for (int i = 1; i < coloumns - 1; i++) {
+  for (int i = 1; i < columns - 1; i++) {
     plugs.push_back(Plug(0, i, SIDE_TOP));
     plugs.push_back(Plug(rows - 1, i, SIDE_BOTTOM));
   }

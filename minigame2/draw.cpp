@@ -5,9 +5,9 @@ void DrawGrid() {
   for (int x = 1; x < ROWS; x++) {
     xOffset = MINIGAME_START_X + x * GRID_SIZE;
     DrawLine(xOffset, MINIGAME_START_Y, xOffset,
-             MINIGAME_START_Y + GRID_SIZE * COLOUMNS, GRAY);
+             MINIGAME_START_Y + GRID_SIZE * COLUMNS, GRAY);
   }
-  for (int y = 1; y < COLOUMNS; y++) {
+  for (int y = 1; y < COLUMNS; y++) {
     yOffset = MINIGAME_START_Y + y * GRID_SIZE;
     DrawLine(MINIGAME_START_X, yOffset, MINIGAME_START_X + GRID_SIZE * ROWS,
              yOffset, GRAY);
