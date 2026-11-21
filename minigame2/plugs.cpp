@@ -1,14 +1,13 @@
 #include "header.h"
 #include <cstdlib>
 
-Plugs::Plugs(int newRows, int newColumns) {
-  rows = newRows;
-  columns = newColumns;
+Plugs::Plugs() {
+  rows = ROWS;
+  columns = COLUMNS;
 }
 
 void Plugs::GeneratePlugs() {
   plugs.clear();
-  // cout << "rows: " << rows << ", columns: " << columns << endl;
   for (int i = 1; i < rows - 1; i++) {
     plugs.push_back(Plug(i, 0, SIDE_LEFT));
     plugs.push_back(Plug(i, columns - 1, SIDE_RIGHT));

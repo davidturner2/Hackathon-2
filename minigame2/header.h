@@ -4,18 +4,28 @@
 
 using namespace std;
 
-inline int MINIGAME_START_X = 100;
-inline int MINIGAME_START_Y = 100;
+inline Texture2D PLUG;
+
+inline int MINIGAME_START_X = 10;
+inline int MINIGAME_START_Y = 10;
 inline int PLUG_WIDTH = 50;
 inline int PLUG_HEIGHT = 30;
 inline int GRID_SIZE = 70;
 
+const int GAME_SIZE = 600;
+const int PADDING = 10;
+
 inline int ROWS = 5;
 inline int COLUMNS = 5;
+
+const Color WIRE_COLOR = {203, 212, 216, 255};
 
 inline int setup(int rows, int columns) {
   ROWS = rows;
   COLUMNS = columns;
+  GRID_SIZE = GAME_SIZE / max(rows, columns);
+  PLUG_WIDTH = GRID_SIZE * 0.7;
+  PLUG_HEIGHT = GRID_SIZE * 0.4;
   return 0;
 }
 
@@ -59,9 +69,10 @@ public:
 
   void GeneratePlugs();
   void GenerateWires();
-  Plugs(int newRows, int newColumns);
+  Plugs();
 };
 
 void DrawGrid();
 void DrawPlugs(Plugs plugs);
 void DrawWires(Plugs plugs);
+void DrawHud();

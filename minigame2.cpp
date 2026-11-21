@@ -11,7 +11,14 @@ int minigame2_sample() {
   InitWindow(1000, 800, "Minigame 2 Sample");
   SetTargetFPS(30);
 
-  Plugs plugs = Plugs(ROWS, COLUMNS);
+  setup(9, 9);
+  PLUG = LoadTexture("minigame2/assets/plug.png");
+  if (PLUG.id == 0) {
+    CloseWindow();
+    return -1;
+  }
+
+  Plugs plugs = Plugs();
   plugs.GeneratePlugs();
   plugs.GenerateWires();
 
@@ -20,8 +27,9 @@ int minigame2_sample() {
     ClearBackground(BLACK);
 
     DrawGrid();
-    DrawPlugs(plugs);
     DrawWires(plugs);
+    DrawPlugs(plugs);
+    DrawHud();
 
     EndDrawing();
   }
