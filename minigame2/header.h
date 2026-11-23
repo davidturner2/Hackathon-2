@@ -1,5 +1,6 @@
 // headers here ...
 #include "raylib.h"
+#include <algorithm>
 #include <vector>
 
 using namespace std;
@@ -13,49 +14,62 @@ inline int MINIGAME_START_Y = PADDING; // The offset of the minigame grid from y
 
 const int GAME_SIZE = 600; // Size of the board in pixels
 
-inline int ROWS;        // Number of cell rows
-inline int COLUMNS;     // Number of cell columns
+inline int ROWS = 9;    // Number of cell rows
+inline int COLUMNS = 9; // Number of cell columns
 inline int PLUG_WIDTH;  // plug's longest side
 inline int PLUG_HEIGHT; // plug's shortest side
 inline int CELL_SIZE;   // The size of each cell
 
 // Gameplay Stuff
-const float GAME_DURATION = 10.0f; // seconds the player has to clear the board
-const int MIN_EXPLODE_TIME = 3;    // shortest fuse of an overheating plug (s)
-const int MAX_EXPLODE_TIME = 10;   // longest fuse of an overheating plug (s)
-const float FADE_DURATION = 0.5f;  // seconds a cut/exploded system fades out
+inline float GAME_DURATION = 10.0; // seconds the player has to clear the board
+inline float MIN_EXPLODE_TIME = 3.0; // shortest fuse of an overheating plug (s)
+inline float MAX_EXPLODE_TIME = 10.0; // longest fuse of an overheating plug (s)
+const float FADE_DURATION = 0.5;      // seconds a cut/exploded system fades out
 
 // Constants for the Shock bar
 inline float SHOCK_AMOUNT = 0.0;
 const float SHOCK_MAX = 100.0f; // highest amount of shock
-const float SHOCK_DRAIN_RATE =
+inline float SHOCK_DRAIN_RATE =
     50.0f; // how fast the shock bar drains per second
 const float SHOCK_CUT_MIN =
     10.0f; // lowest amount of shock to add when cutting a system
 const float SHOCK_CUT_MAX = 40.0f;   // opposite
 const float SHOCK_EXPLOSION = 40.0f; // an overheating system exploded
+inline float SHOCK_SAFE_CUT = 30.0f; // shock added when cutting a safe wire
+inline float FAIL_THRESHOLD_RATIO =
+    0.20f; // Percentage of total wire allowed to miss.
 
 const float SLICE_DURATION =
     0.4f; // seconds a streak takes to go from one corner to the other
 
-inline int NUM_PLUGS; // Number of plugs on the board
-inline int
-    NUM_EXPLODING_PLUGS; // How many plugs will overheat, does not include the
-                         // safe plugs that may be connected to them
+inline int NUM_PLUGS;           // Number of plugs on the board
+inline int NUM_EXPLODING_PLUGS; // How many plugs will overheat
 
+// plug colors
+inline Color DANGER_PLUG_COLOR = RED;
+inline Color SAFE_PLUG_COLOR = DARKGRAY;
 const Color WIRE_COLOR = {203, 212, 216, 255}; // Wire line color
 
-inline int setup(int rows, int columns) {
-  ROWS = rows;
-  COLUMNS = columns;
-  CELL_SIZE = GAME_SIZE / max(rows, columns);
-  PLUG_WIDTH = CELL_SIZE * 0.7;
-  PLUG_HEIGHT = CELL_SIZE * 0.4;
+class DifficultyConfig {
+public:
+  int rows;
+  int columns;
+  float dangerRatio;
+  float minExplodeTime;
+  float maxExplodeTime;
+  float gameDuration;
+  float shockSafeCut;
+  float shockDrainRate;
+  float failThresholdRatio;
+  float difficultyFactor;
 
-  NUM_PLUGS = ROWS * 2 + COLUMNS * 2 - 8;
-  NUM_EXPLODING_PLUGS = 0;
-  return 0;
-}
+  DifficultyConfig();
+  DifficultyConfig(float factor);
+
+  void Apply() const;
+};
+
+inline DifficultyConfig CURRENT_CONFIG;
 
 // Previously we used some math to check if the wire was on the left or right
 // side of the grid, or top or bottom. We decided to use an enum since it can
@@ -71,8 +85,20 @@ inline int setup(int rows, int columns) {
 // learned in class, but it got very un-readable :)
 enum Side { SIDE_TOP, SIDE_BOTTOM, SIDE_LEFT, SIDE_RIGHT };
 
-// State of Game
-enum GameState { GAME_PLAYING, GAME_WON, GAME_LOST_CUT_SAFE, GAME_LOST_TIME };
+enum GameState {
+  GAME_PLAYING,
+  GAME_WON,
+  GAME_LOST_CUT_SAFE,
+  GAME_LOST_TIME,
+  GAME_LOST_TOO_MANY_MISSED
+};
+
+inline GameState CURRENT_GAME_STATE = GAME_PLAYING;
+inline float CURRENT_TIME_LEFT = 10.0f;
+inline int MISSED_CABLES_COUNT = 0;
+
+void RestartMinigame2(const DifficultyConfig &config);
+void RestartMinigame2();
 
 class Plug {
 public:
@@ -87,7 +113,8 @@ public:
   bool ignore;      // true when the system was cut or exploded
   bool safe; // false only if this plug overheats, but its connected plug may be
              // safe.
-  bool saved; // true if the player cut the system before it exploded
+  bool saved;   // true if the player cut the system before it exploded
+  bool expired; // true if the plug turned grey without being cut
   Rectangle GetPlugRect() const;
   Vector2 GetWireAnchor() const;
   Plug(int newRow, int newColumn, Side newSide);
@@ -127,6 +154,8 @@ void DrawPlugs(Plugs plugs);
 void DrawWires(Plugs plugs);
 void DrawSlices(vector<Slice> slices);
 void DrawShockBar(int x, int y);
+void DrawHud(float timeLeft, GameState state, int missedCables,
+             int maxAllowedMissed, int totalWires);
 void DrawHud(float timeLeft, GameState state);
 
 // Some utility functions
