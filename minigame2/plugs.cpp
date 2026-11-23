@@ -48,3 +48,32 @@ void Plugs::GenerateWires() {
     wires.push_back(Wire(plugIndex1, plugIndex2));
   }
 }
+
+void Plugs::UpdatePlugs(float deltaTime) {
+  for (auto &plug : plugs) {
+    plug.explodedThisFrame = false;
+    plug.tick += deltaTime;
+    if (plug.tick > plug.explodeAt && !plug.safe) {
+      plug.ignore = true;
+      plug.explodedThisFrame = true;
+    }
+  }
+}
+
+void Plugs::UpdateWires(float deltaTime) {
+  for (const auto &wire : wires) {
+    Plug &plug1 = plugs[wire.plugIndex1];
+    Plug &plug2 = plugs[wire.plugIndex2];
+
+    if (plug1.explodedThisFrame &&
+        (plug2.tick < plug2.explodeAt || plug2.safe)) {
+      plug2.explodeAt = plug2.tick + (plug1.tick - plug1.explodeAt);
+      plug2.safe = false;
+    }
+    if (plug2.explodedThisFrame &&
+        (plug1.tick < plug1.explodeAt || plug1.safe)) {
+      plug1.explodeAt = plug1.tick + (plug2.tick - plug2.explodeAt);
+      plug1.safe = false;
+    }
+  }
+}

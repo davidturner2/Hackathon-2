@@ -26,5 +26,6 @@ add_executable(main
     minigame2/plugs.cpp
     minigame2/wire.cpp
     minigame2/draw.cpp
+    minigame2/clipping.cpp
 )
 target_link_libraries(main PRIVATE raylib)

@@ -1,5 +1,6 @@
 #include "header.h"
 #include "raylib.h"
+#include "raymath.h"
 #include <string>
 
 void DrawGrid() {
@@ -18,11 +19,21 @@ void DrawGrid() {
 
 void DrawPlugs(Plugs plugs) {
   for (const auto &plug : plugs.plugs) {
-    DrawRectangleRec(plug.GetPlugRect(), DARKGRAY);
+    Color plugColor;
+    if (plug.safe) {
+      plugColor = DARKGRAY;
+    } else if (plug.tick > plug.explodeAt) {
+      float alphaNormalized =
+          Lerp(255, 0, (plug.tick - plug.explodeAt) / 0.5) / 255.0f;
+      plugColor = Fade(RED, alphaNormalized);
+    } else {
+      plugColor = ColorLerp(DARKGRAY, RED, plug.tick / plug.explodeAt);
+    }
+    DrawRectangleRec(plug.GetPlugRect(), plugColor);
   }
 }
 
-void DrawWireHeadTexture(Vector2 center, Side side) {
+void DrawWireHeadTexture(Vector2 center, Side side, float alphaNormalized) {
   float rotation = 0.0f;
   // scale so that head fits in the plug rectangle
   float scale = PLUG_WIDTH / static_cast<float>(PLUG.width);
@@ -53,7 +64,8 @@ void DrawWireHeadTexture(Vector2 center, Side side) {
                  Rectangle{0, 0, static_cast<float>(PLUG.width),
                            static_cast<float>(PLUG.height)},
                  Rectangle{center.x, center.y, xDimension, yDimension},
-                 Vector2{xDimension / 2, yDimension / 2}, rotation, WHITE);
+                 Vector2{xDimension / 2, yDimension / 2}, rotation,
+                 Fade(WHITE, alphaNormalized));
 }
 
 Vector2 GetWireHeadPosition(Vector2 center, Side side) {
@@ -80,10 +92,10 @@ Vector2 GetWireHeadPosition(Vector2 center, Side side) {
 }
 
 void ConnectWireHeads(Vector2 startCenter, Vector2 endCenter, Side startSide,
-                      Side endSide) {
+                      Side endSide, float alphaNormalized) {
   Vector2 startHead = GetWireHeadPosition(startCenter, startSide);
   Vector2 endHead = GetWireHeadPosition(endCenter, endSide);
-  DrawLineBezier(startHead, endHead, 2.0, WIRE_COLOR);
+  DrawLineEx(startHead, endHead, 2.0, Fade(WIRE_COLOR, alphaNormalized));
 }
 
 void DrawWires(Plugs plugs) {
@@ -94,9 +106,15 @@ void DrawWires(Plugs plugs) {
     Vector2 startCenter = startPlug.GetWireAnchor();
     Vector2 endCenter = endPlug.GetWireAnchor();
 
-    DrawWireHeadTexture(startCenter, startPlug.side);
-    DrawWireHeadTexture(endCenter, endPlug.side);
-    ConnectWireHeads(startCenter, endCenter, startPlug.side, endPlug.side);
+    float alphaNormalized = 1.0f;
+    if (!startPlug.safe) {
+      alphaNormalized =
+          Lerp(255, 0, (startPlug.tick - startPlug.explodeAt) / 0.5) / 255.0f;
+    }
+    DrawWireHeadTexture(startCenter, startPlug.side, alphaNormalized);
+    DrawWireHeadTexture(endCenter, endPlug.side, alphaNormalized);
+    ConnectWireHeads(startCenter, endCenter, startPlug.side, endPlug.side,
+                     alphaNormalized);
   }
 }
 

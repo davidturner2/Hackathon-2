@@ -1,9 +1,23 @@
 #include "header.h"
+#include <cstdlib>
 
 Plug::Plug(int newRow, int newColumn, Side newSide) {
   row = newRow;
   column = newColumn;
   side = newSide;
+
+  explodeAt = 0.0;
+  tick = 0.0;
+  explodedThisFrame = false;
+
+  ignore = false;
+  safe = true;
+  saved = false;
+
+  if (rand() % 3 == 0) {
+    safe = false;
+    explodeAt = static_cast<float>(rand() % 10 + 1);
+  }
 }
 
 // Get the rectangle that represents the plug's position and size on the screen
@@ -19,14 +33,20 @@ Rectangle Plug::GetPlugRect() const {
 
   switch (side) {
   case SIDE_TOP:
-    return Rectangle{cellX + centered, cellY, static_cast<float>(PLUG_WIDTH), static_cast<float>(PLUG_HEIGHT)};
+    return Rectangle{cellX + centered, cellY, static_cast<float>(PLUG_WIDTH),
+                     static_cast<float>(PLUG_HEIGHT)};
   case SIDE_BOTTOM:
-    return Rectangle{cellX + centered, cellY + pushed, static_cast<float>(PLUG_WIDTH), static_cast<float>(PLUG_HEIGHT)};
+    return Rectangle{cellX + centered, cellY + pushed,
+                     static_cast<float>(PLUG_WIDTH),
+                     static_cast<float>(PLUG_HEIGHT)};
   case SIDE_LEFT:
-    return Rectangle{cellX, cellY + centered, static_cast<float>(PLUG_HEIGHT), static_cast<float>(PLUG_WIDTH)};
+    return Rectangle{cellX, cellY + centered, static_cast<float>(PLUG_HEIGHT),
+                     static_cast<float>(PLUG_WIDTH)};
 
   default:
-    return Rectangle{cellX + pushed, cellY + centered, static_cast<float>(PLUG_HEIGHT), static_cast<float>(PLUG_WIDTH)};
+    return Rectangle{cellX + pushed, cellY + centered,
+                     static_cast<float>(PLUG_HEIGHT),
+                     static_cast<float>(PLUG_WIDTH)};
   }
 }
 

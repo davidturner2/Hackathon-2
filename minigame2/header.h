@@ -20,12 +20,18 @@ inline int COLUMNS = 5;
 
 const Color WIRE_COLOR = {203, 212, 216, 255};
 
+inline int NUM_PLUGS = 0;
+inline int NUM_EXPLODING_PLUGS = 0;
+
 inline int setup(int rows, int columns) {
   ROWS = rows;
   COLUMNS = columns;
   GRID_SIZE = GAME_SIZE / max(rows, columns);
   PLUG_WIDTH = GRID_SIZE * 0.7;
   PLUG_HEIGHT = GRID_SIZE * 0.4;
+
+  NUM_PLUGS = ROWS * 2 + COLUMNS * 2 - 8;
+  NUM_EXPLODING_PLUGS = 0;
   return 0;
 }
 
@@ -48,6 +54,12 @@ public:
   int row;
   int column;
   Side side;
+  float tick;
+  float explodeAt;
+  bool explodedThisFrame;
+  bool ignore;
+  bool safe;
+  bool saved;
   Rectangle GetPlugRect() const;
   Vector2 GetWireAnchor() const;
   Plug(int newRow, int newColumn, Side newSide);
@@ -69,6 +81,8 @@ public:
 
   void GeneratePlugs();
   void GenerateWires();
+  void UpdatePlugs(float deltaTime);
+  void UpdateWires(float deltaTime);
   Plugs();
 };
 
@@ -76,3 +90,10 @@ void DrawGrid();
 void DrawPlugs(Plugs plugs);
 void DrawWires(Plugs plugs);
 void DrawHud();
+
+// Some utility functions
+Vector2 MousePositionToGridPosition(Vector2 mousePosition);
+bool CohenSutherlandLineClip(double &x0, double &y0, double &x1, double &y1,
+                             double xmin, double ymin, double xmax,
+                             double ymax);
+Vector2 GetWireHeadPosition(Vector2 center, Side side);
