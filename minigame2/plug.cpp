@@ -8,7 +8,7 @@ Plug::Plug(int newRow, int newColumn, Side newSide) {
 
   explodeAt = 0.0;
   tick = 0.0;
-  explodedThisFrame = false;
+  resolvedAt = 0.0;
 
   ignore = false;
   safe = true;
@@ -16,20 +16,21 @@ Plug::Plug(int newRow, int newColumn, Side newSide) {
 
   if (rand() % 3 == 0) {
     safe = false;
-    explodeAt = static_cast<float>(rand() % 10 + 1);
+    explodeAt = static_cast<float>(
+        MIN_EXPLODE_TIME + rand() % (MAX_EXPLODE_TIME - MIN_EXPLODE_TIME + 1));
   }
 }
 
 // Get the rectangle that represents the plug's position and size on the screen
 Rectangle Plug::GetPlugRect() const {
   // The plug rectangle's cell left side
-  float cellX = MINIGAME_START_X + column * GRID_SIZE;
+  float cellX = MINIGAME_START_X + column * CELL_SIZE;
   // The plug rectangle's cell top side
-  float cellY = MINIGAME_START_Y + row * GRID_SIZE;
+  float cellY = MINIGAME_START_Y + row * CELL_SIZE;
   // Center the plug rectangle in the cell on its longest side
-  float centered = (GRID_SIZE - PLUG_WIDTH) / 2.0f;
+  float centered = (CELL_SIZE - PLUG_WIDTH) / 2.0f;
   // Push the plug rectangle to the bottom or right of the cell
-  float pushed = GRID_SIZE - PLUG_HEIGHT;
+  float pushed = CELL_SIZE - PLUG_HEIGHT;
 
   switch (side) {
   case SIDE_TOP:

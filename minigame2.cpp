@@ -1,13 +1,16 @@
 #include "main.h"
 #include "minigame2/header.h"
 #include "raylib.h"
+#include "raymath.h"
 #include <cstdlib>
 #include <ctime>
 #include <iostream>
 
 using namespace std;
 
-void SlashWiresInGridPosition(Plugs &plugs, Vector2 gridPosition);
+Rectangle GridPositionToRectangle(Vector2 gridPosition);
+bool SlashWiresInGridPosition(Plugs &plugs, Vector2 gridPosition);
+void UpdateSlices(vector<Slice> &slices, float deltaTime);
 
 int minigame2_sample() {
   srand(time(0));
@@ -25,28 +28,59 @@ int minigame2_sample() {
   plugs.GeneratePlugs();
   plugs.GenerateWires();
 
-  float fps;
+  Rectangle gridArea = {static_cast<float>(MINIGAME_START_X),
+                        static_cast<float>(MINIGAME_START_Y),
+                        static_cast<float>(CELL_SIZE * COLUMNS),
+                        static_cast<float>(CELL_SIZE * ROWS)};
+  vector<Slice> slices;
+  GameState state = GAME_PLAYING;
+  float timeLeft = GAME_DURATION;
+
+  float deltaTime;
   while (!WindowShouldClose()) {
     BeginDrawing();
     ClearBackground(BLACK);
-    fps = GetFrameTime();
+    deltaTime = GetFrameTime();
 
     DrawGrid();
-    plugs.UpdatePlugs(fps);
-    plugs.UpdateWires(fps);
 
-    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+    plugs.UpdatePlugs(deltaTime);
+    UpdateSlices(slices, deltaTime);
+    SHOCK_AMOUNT = max(0.0f, SHOCK_AMOUNT - SHOCK_DRAIN_RATE * deltaTime);
+
+    if (state == GAME_PLAYING) {
+      timeLeft -= deltaTime;
+
+      // When an overheating system explode shocks the player
+      SHOCK_AMOUNT += plugs.UpdateWires(deltaTime) * SHOCK_EXPLOSION;
+
+      // The player can't cut anything while they are shocked
       Vector2 mousePosition = GetMousePosition();
-      Vector2 gridPosition = MousePositionToGridPosition(mousePosition);
-      cout << "Mouse Position: (" << mousePosition.x << ", " << mousePosition.y
-           << ") Grid Position: (" << gridPosition.x << ", " << gridPosition.y
-           << ")" << endl;
-      SlashWiresInGridPosition(plugs, gridPosition);
+      if (SHOCK_AMOUNT <= 0.0f && IsMouseButtonPressed(MOUSE_BUTTON_LEFT) &&
+          CheckCollisionPointRec(mousePosition, gridArea)) {
+        Vector2 gridPosition = MousePositionToGridPosition(mousePosition);
+
+        slices.push_back(Slice{GridPositionToRectangle(gridPosition), 0.0f});
+        bool cutSafeWire = SlashWiresInGridPosition(plugs, gridPosition);
+        if (cutSafeWire) {
+          state = GAME_LOST_CUT_SAFE;
+        }
+      }
+      SHOCK_AMOUNT = min(SHOCK_AMOUNT, SHOCK_MAX);
+
+      if (state == GAME_PLAYING) {
+        if (!plugs.HasUnresolvedOverheating()) {
+          state = GAME_WON;
+        } else if (timeLeft <= 0.0f) {
+          state = GAME_LOST_TIME;
+        }
+      }
     }
 
     DrawWires(plugs);
     DrawPlugs(plugs);
-    DrawHud();
+    DrawSlices(slices);
+    DrawHud(timeLeft, state);
 
     EndDrawing();
   }
@@ -55,13 +89,31 @@ int minigame2_sample() {
 }
 
 Rectangle GridPositionToRectangle(Vector2 gridPosition) {
-  float x = MINIGAME_START_X + gridPosition.x * GRID_SIZE;
-  float y = MINIGAME_START_Y + gridPosition.y * GRID_SIZE;
-  return Rectangle{x, y, static_cast<float>(GRID_SIZE),
-                   static_cast<float>(GRID_SIZE)};
+  float x = MINIGAME_START_X + gridPosition.x * CELL_SIZE;
+  float y = MINIGAME_START_Y + gridPosition.y * CELL_SIZE;
+  return Rectangle{x, y, static_cast<float>(CELL_SIZE),
+                   static_cast<float>(CELL_SIZE)};
 }
 
-void SlashWiresInGridPosition(Plugs &plugs, Vector2 gridPosition) {
+void UpdateSlices(vector<Slice> &slices, float deltaTime) {
+  for (int i = static_cast<int>(slices.size()) - 1; i >= 0; i--) {
+    slices[i].tick += deltaTime;
+    if (slices[i].tick > SLICE_DURATION) {
+      slices.erase(slices.begin() + i);
+    }
+  }
+}
+
+float GetCutShock(float explodeAt) {
+  float fuseRange = MAX_EXPLODE_TIME - MIN_EXPLODE_TIME;
+  float fastness = 1.0f - (explodeAt - MIN_EXPLODE_TIME) / fuseRange;
+  return Lerp(SHOCK_CUT_MIN, SHOCK_CUT_MAX, Clamp(fastness, 0.0f, 1.0f));
+}
+
+// Cuts every wire that passes through the grid cell. Returns true if a safe
+// wire is cut.
+bool SlashWiresInGridPosition(Plugs &plugs, Vector2 gridPosition) {
+  bool cutSafeWire = false;
   Rectangle gridRect = GridPositionToRectangle(gridPosition);
   for (auto &wire : plugs.wires) {
     Plug &startPlug = plugs.plugs[wire.plugIndex1];
@@ -86,8 +138,14 @@ void SlashWiresInGridPosition(Plugs &plugs, Vector2 gridPosition) {
                                 gridRect.x + gridRect.width,
                                 gridRect.y + gridRect.height)) {
 
-      startPlug.explodeAt = startPlug.tick;
-      endPlug.explodeAt = endPlug.tick;
+      if (startPlug.safe && endPlug.safe) {
+        cutSafeWire = true;
+        plugs.ResolveWire(wire, false);
+      } else {
+        SHOCK_AMOUNT += GetCutShock(startPlug.explodeAt);
+        plugs.ResolveWire(wire, true);
+      }
     }
   }
+  return cutSafeWire;
 }

@@ -41,39 +41,90 @@ void Plugs::GenerateWires() {
       }
     }
 
+    if (candidates.empty()) {
+      for (unsigned int i = 0; i < remaining.size(); i++) {
+        candidates.push_back(i);
+      }
+    }
+
     unsigned int pos2 = candidates[rand() % candidates.size()];
     unsigned int plugIndex2 = remaining[pos2];
     remaining.erase(remaining.begin() + pos2);
 
     wires.push_back(Wire(plugIndex1, plugIndex2));
   }
-}
 
-void Plugs::UpdatePlugs(float deltaTime) {
-  for (auto &plug : plugs) {
-    plug.explodedThisFrame = false;
-    plug.tick += deltaTime;
-    if (plug.tick > plug.explodeAt && !plug.safe) {
-      plug.ignore = true;
-      plug.explodedThisFrame = true;
-    }
-  }
-}
-
-void Plugs::UpdateWires(float deltaTime) {
+  // Makes both plugs in a system connected by the same wire share the same
+  // explodeAt time so that both disappear at the same time
   for (const auto &wire : wires) {
     Plug &plug1 = plugs[wire.plugIndex1];
     Plug &plug2 = plugs[wire.plugIndex2];
 
-    if (plug1.explodedThisFrame &&
-        (plug2.tick < plug2.explodeAt || plug2.safe)) {
-      plug2.explodeAt = plug2.tick + (plug1.tick - plug1.explodeAt);
-      plug2.safe = false;
+    if (plug1.safe && plug2.safe) {
+      continue;
     }
-    if (plug2.explodedThisFrame &&
-        (plug1.tick < plug1.explodeAt || plug1.safe)) {
-      plug1.explodeAt = plug1.tick + (plug2.tick - plug2.explodeAt);
-      plug1.safe = false;
+
+    float shortest;
+    if (plug1.safe) {
+      shortest = plug2.explodeAt;
+    } else if (plug2.safe) {
+      shortest = plug1.explodeAt;
+    } else {
+      shortest = min(plug1.explodeAt, plug2.explodeAt);
+    }
+    plug1.explodeAt = shortest;
+    plug2.explodeAt = shortest;
+  }
+}
+
+void Plugs::UpdatePlugs(float deltaTime) {
+  for (auto &plug : plugs) {
+    plug.tick += deltaTime;
+  }
+}
+
+// Updates every wire system. Returns how many systems exploded this frame.
+int Plugs::UpdateWires(float deltaTime) {
+  int exploded = 0;
+  for (const auto &wire : wires) {
+    Plug &plug1 = plugs[wire.plugIndex1];
+    Plug &plug2 = plugs[wire.plugIndex2];
+
+    bool systemSafe = plug1.safe && plug2.safe;
+    if (plug1.ignore || systemSafe) {
+      continue;
+    }
+
+    if (plug1.tick > plug1.explodeAt) {
+      ResolveWire(wire, false);
+      exploded++;
     }
   }
+  return exploded;
+}
+
+void Plugs::ResolveWire(Wire wire, bool saved) {
+  Plug &plug1 = plugs[wire.plugIndex1];
+  Plug &plug2 = plugs[wire.plugIndex2];
+
+  plug1.ignore = true;
+  plug1.saved = saved;
+  plug1.resolvedAt = plug1.tick;
+
+  plug2.ignore = true;
+  plug2.saved = saved;
+  plug2.resolvedAt = plug2.tick;
+}
+
+// returns true if one system that is not safe is on the board
+bool Plugs::HasUnresolvedOverheating() const {
+  for (const auto &wire : wires) {
+    const Plug &plug1 = plugs[wire.plugIndex1];
+    const Plug &plug2 = plugs[wire.plugIndex2];
+
+    if (!plug1.ignore && (!plug1.safe || !plug2.safe)) {
+      return true;
+    }
+  }
+  return false;
 }

@@ -6,29 +6,33 @@
 void DrawGrid() {
   int xOffset, yOffset;
   for (int x = 1; x < ROWS; x++) {
-    xOffset = MINIGAME_START_X + x * GRID_SIZE;
+    xOffset = MINIGAME_START_X + x * CELL_SIZE;
     DrawLine(xOffset, MINIGAME_START_Y, xOffset,
-             MINIGAME_START_Y + GRID_SIZE * COLUMNS, GRAY);
+             MINIGAME_START_Y + CELL_SIZE * COLUMNS, GRAY);
   }
   for (int y = 1; y < COLUMNS; y++) {
-    yOffset = MINIGAME_START_Y + y * GRID_SIZE;
-    DrawLine(MINIGAME_START_X, yOffset, MINIGAME_START_X + GRID_SIZE * ROWS,
+    yOffset = MINIGAME_START_Y + y * CELL_SIZE;
+    DrawLine(MINIGAME_START_X, yOffset, MINIGAME_START_X + CELL_SIZE * ROWS,
              yOffset, GRAY);
   }
 }
 
+float GetFadeAlpha(Plug plug) {
+  if (!plug.ignore) {
+    return 1.0f;
+  }
+  return Clamp(1.0f - (plug.tick - plug.resolvedAt) / FADE_DURATION, 0.0f,
+               1.0f);
+}
+
 void DrawPlugs(Plugs plugs) {
   for (const auto &plug : plugs.plugs) {
-    Color plugColor;
-    if (plug.safe) {
-      plugColor = DARKGRAY;
-    } else if (plug.tick > plug.explodeAt) {
-      float alphaNormalized =
-          Lerp(255, 0, (plug.tick - plug.explodeAt) / 0.5) / 255.0f;
-      plugColor = Fade(RED, alphaNormalized);
-    } else {
-      plugColor = ColorLerp(DARKGRAY, RED, plug.tick / plug.explodeAt);
+    Color plugColor = DARKGRAY;
+    if (!plug.safe) {
+      float heat = Clamp(plug.tick / plug.explodeAt, 0.0f, 1.0f);
+      plugColor = ColorLerp(DARKGRAY, RED, heat);
     }
+    plugColor = Fade(plugColor, GetFadeAlpha(plug));
     DrawRectangleRec(plug.GetPlugRect(), plugColor);
   }
 }
@@ -106,11 +110,7 @@ void DrawWires(Plugs plugs) {
     Vector2 startCenter = startPlug.GetWireAnchor();
     Vector2 endCenter = endPlug.GetWireAnchor();
 
-    float alphaNormalized = 1.0f;
-    if (!startPlug.safe) {
-      alphaNormalized =
-          Lerp(255, 0, (startPlug.tick - startPlug.explodeAt) / 0.5) / 255.0f;
-    }
+    float alphaNormalized = GetFadeAlpha(startPlug);
     DrawWireHeadTexture(startCenter, startPlug.side, alphaNormalized);
     DrawWireHeadTexture(endCenter, endPlug.side, alphaNormalized);
     ConnectWireHeads(startCenter, endCenter, startPlug.side, endPlug.side,
@@ -119,15 +119,44 @@ void DrawWires(Plugs plugs) {
 }
 
 Vector2 MousePositionToGridPosition(Vector2 mousePosition) {
-  int col = (mousePosition.x - MINIGAME_START_X) / GRID_SIZE;
-  int row = (mousePosition.y - MINIGAME_START_Y) / GRID_SIZE;
+  int col = (mousePosition.x - MINIGAME_START_X) / CELL_SIZE;
+  int row = (mousePosition.y - MINIGAME_START_Y) / CELL_SIZE;
   col = max(0, min(col, COLUMNS - 1));
   row = max(0, min(row, ROWS - 1));
   return Vector2{static_cast<float>(col), static_cast<float>(row)};
 }
 
-void DrawHud() {
-  int offsetY = PADDING * 2 + GRID_SIZE * ROWS;
+void DrawSlices(vector<Slice> slices) {
+  for (const auto &slice : slices) {
+    float offset = CELL_SIZE * 0.1f;
+    Rectangle cell = slice.cell;
+    Vector2 topLeft = {cell.x + offset, cell.y + offset};
+    Vector2 topRight = {cell.x + cell.width - offset, cell.y + offset};
+    Vector2 bottomLeft = {cell.x + offset, cell.y + cell.height - offset};
+    Vector2 bottomRight = {cell.x + cell.width - offset,
+                           cell.y + cell.height - offset};
+
+    float alphaNormalized = Clamp(slice.tick / SLICE_DURATION, 0.0f, 1.0f);
+    DrawLineEx(topLeft, bottomRight, 4.0f, Fade(WHITE, alphaNormalized));
+    DrawLineEx(topRight, bottomLeft, 4.0f, Fade(WHITE, alphaNormalized));
+  }
+}
+
+// The shock bar is two rectangles: the outline and the bar filling it
+void DrawShockBar(int x, int y) {
+  int width = 300;
+  int height = 24;
+  int border = 2;
+
+  float filled = Clamp(SHOCK_AMOUNT / SHOCK_MAX, 0.0f, 1.0f);
+  DrawRectangleLines(x, y, width, height, WHITE);
+  DrawRectangle(x + border, y + border,
+                static_cast<int>((width - border * 2) * filled),
+                height - border * 2, YELLOW);
+}
+
+void DrawHud(float timeLeft, GameState state) {
+  int offsetY = PADDING * 2 + CELL_SIZE * ROWS;
   int textSize = 20;
   DrawText("Minigame 2: Unplug the plugs!", PADDING, offsetY, textSize, WHITE);
 
@@ -136,4 +165,26 @@ void DrawHud() {
                        ", Y: " + to_string(static_cast<int>(gridPos.y));
   DrawText(gridPosText.c_str(), PADDING, offsetY + textSize + PADDING, textSize,
            WHITE);
+
+  int panelX = MINIGAME_START_X + CELL_SIZE * COLUMNS + PADDING * 2;
+  int panelY = MINIGAME_START_Y;
+  DrawText(TextFormat("Time: %.1f", max(timeLeft, 0.0f)), panelX, panelY,
+           textSize, WHITE);
+  DrawText("Shock", panelX, panelY + textSize + PADDING, textSize, WHITE);
+  DrawShockBar(panelX, panelY + (textSize + PADDING) * 2);
+
+  int resultY = panelY + 120;
+  switch (state) {
+  case GAME_WON:
+    DrawText("All clear, you win!", panelX, resultY, 20, GREEN);
+    break;
+  case GAME_LOST_CUT_SAFE:
+    DrawText("You cut a safe wire!", panelX, resultY, 20, RED);
+    break;
+  case GAME_LOST_TIME:
+    DrawText("Time ran out!", panelX, resultY, 20, RED);
+    break;
+  default:
+    break;
+  }
 }
