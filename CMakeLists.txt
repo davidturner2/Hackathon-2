@@ -21,6 +21,8 @@ target_link_libraries(example PRIVATE raylib)
 # ==========================================================
 add_executable(main
     main.cpp
+    slipstream.cpp
+    minigameboat.cpp
     minigame2.cpp
     minigame2/plug.cpp
     minigame2/plugs.cpp
