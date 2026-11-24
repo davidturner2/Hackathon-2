@@ -1,6 +1,32 @@
 #include "header.h"
-#include <iostream>
+#include <cstdlib>
+#include <string>
 using namespace std;
+
+void SetDangerPlugColor(string color) {
+  for (auto &c : color) {
+    c = tolower(c);
+  }
+  DANGER_PLUG_COLOR_NAME = color;
+  if (color == "red")
+    DANGER_PLUG_COLOR = RED;
+  else if (color == "yellow")
+    DANGER_PLUG_COLOR = YELLOW;
+  else if (color == "green")
+    DANGER_PLUG_COLOR = GREEN;
+  else if (color == "blue")
+    DANGER_PLUG_COLOR = BLUE;
+  else if (color == "purple")
+    DANGER_PLUG_COLOR = PURPLE;
+  else if (color == "orange")
+    DANGER_PLUG_COLOR = ORANGE;
+  else if (color == "pink")
+    DANGER_PLUG_COLOR = PINK;
+  else if (color == "brown")
+    DANGER_PLUG_COLOR = BROWN;
+  else if (color == "white")
+    DANGER_PLUG_COLOR = WHITE;
+}
 
 void RestartMinigame2(const DifficultyConfig &config) {
   config.Apply();
@@ -102,6 +128,7 @@ SessionState LevelUpIfNeeded() {
             min(1.0f, CURRENT_CONFIG.difficultyFactor + difficultyStep);
         RestartMinigame2(DifficultyConfig(nextFactor));
         POST_ROUND_TIMER = 0.0f;
+        return SESSION_GAME_WON;
       } else {
         return SESSION_LOST;
       }

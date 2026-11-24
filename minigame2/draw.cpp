@@ -143,9 +143,9 @@ void DrawSlices(vector<Slice> slices) {
 }
 
 void DrawShockBar(int x, int y) {
-  int width = 300;
-  int height = 24;
-  int border = 2;
+  int width = 360;
+  int height = 20;
+  int border = 1;
 
   float filled = Clamp(SHOCK_AMOUNT / SHOCK_MAX, 0.0f, 1.0f);
   DrawRectangleLines(x, y, width, height, WHITE);
@@ -156,47 +156,59 @@ void DrawShockBar(int x, int y) {
 
 void DrawHud() {
   int offsetY = PADDING * 2 + CELL_SIZE * ROWS;
-  int textSize = 20;
-  DrawText("Minigame 2: Unplug the plugs!", PADDING, offsetY, textSize, WHITE);
+  int titleSize = 20;
+  int textSize = 16;
 
-  Vector2 gridPos = MousePositionToGridPosition(GetMousePosition());
-  string gridPosText = "Grid X: " + to_string(static_cast<int>(gridPos.x)) +
-                       ", Y: " + to_string(static_cast<int>(gridPos.y));
-  DrawText(gridPosText.c_str(), PADDING, offsetY + textSize + PADDING, textSize,
+  // title
+  // Convert to char[] since DrawText does not support string
+  DrawText(TextFormat("Minigame 2: Unplug the %s plugs!",
+                      DANGER_PLUG_COLOR_NAME.c_str()),
+           PADDING, offsetY, titleSize, WHITE);
+
+  // shock bar
+  DrawText("Shock", PADDING, offsetY + titleSize + PADDING + 2, textSize,
            WHITE);
+  DrawShockBar(PADDING * 2 + 50, offsetY + titleSize + PADDING);
 
-  int panelX = MINIGAME_START_X + CELL_SIZE * COLUMNS + PADDING * 2;
-  int panelY = MINIGAME_START_Y;
-  DrawText(TextFormat("Time: %.1f", max(CURRENT_TIME_LEFT, 0.0f)), panelX,
-           panelY, textSize, WHITE);
-  DrawText("Shock", panelX, panelY + textSize + PADDING, textSize, WHITE);
-  DrawShockBar(panelX, panelY + (textSize + PADDING) * 2);
+  // grid position
+  const int belowShockBar = offsetY + titleSize + PADDING * 3 + textSize;
+  Vector2 gridPos = MousePositionToGridPosition(GetMousePosition());
+  DrawText(TextFormat("Grid X: %.0f, Y: %.0f", gridPos.x, gridPos.y), PADDING,
+           belowShockBar, textSize, WHITE);
+  DrawText(TextFormat("Time: %.1f", max(CURRENT_TIME_LEFT, 0.0f)),
+           PADDING * 2 + 150, belowShockBar, textSize, WHITE);
 
+  // Missed wires
   int totalWires = NUM_PLUGS / 2;
   int maxAllowedMissed = static_cast<int>(totalWires * FAIL_THRESHOLD_RATIO);
 
-  int statsY = panelY + (textSize + PADDING) * 3 + 20;
-  Color missedColor =
-      (MISSED_CABLES_COUNT > maxAllowedMissed)
-          ? RED
-          : (MISSED_CABLES_COUNT == maxAllowedMissed ? YELLOW : WHITE);
+  Color missedColor;
+  if (MISSED_CABLES_COUNT > maxAllowedMissed) {
+    missedColor = RED;
+  } else if (MISSED_CABLES_COUNT == maxAllowedMissed) {
+    missedColor = YELLOW;
+  } else {
+    missedColor = WHITE;
+  }
   DrawText(TextFormat("Missed: %d / %d", MISSED_CABLES_COUNT, maxAllowedMissed),
-           panelX, statsY, textSize, missedColor);
-  DrawText(TextFormat("Total Cables: %d", totalWires), panelX,
-           statsY + textSize + 6, 18, LIGHTGRAY);
-  DrawText(TextFormat("Grid: %dx%d", ROWS, COLUMNS), panelX,
-           statsY + (textSize + 6) * 2, 18, LIGHTGRAY);
+           PADDING * 3 + 300, belowShockBar, textSize, missedColor);
+  DrawText(TextFormat("Grid: %dx%d", ROWS, COLUMNS), PADDING * 2 + 450, offsetY,
+           textSize, LIGHTGRAY);
+  DrawText(TextFormat("Total Cables: %d", totalWires), PADDING * 2 + 450,
+           offsetY + textSize + PADDING, textSize, LIGHTGRAY);
 
-  int resultY = statsY + 110;
   switch (CURRENT_GAME_STATE) {
   case GAME_WON:
-    DrawText("You win!", panelX, resultY, 20, GREEN);
+    DrawText("You won this round!", PADDING,
+             belowShockBar + (PADDING + textSize) * 2, textSize, GREEN);
     break;
   case GAME_LOST_TOO_MANY_MISSED:
-    DrawText("Too many cables missed!", panelX, resultY, 20, RED);
+    DrawText("Too many cables missed!", PADDING,
+             belowShockBar + (PADDING + textSize) * 2, textSize, RED);
     break;
   case GAME_LOST_TIME:
-    DrawText("Time ran out!", panelX, resultY, 20, RED);
+    DrawText("Time ran out!", PADDING, belowShockBar + (PADDING + textSize) * 2,
+             textSize, RED);
     break;
   default:
     break;

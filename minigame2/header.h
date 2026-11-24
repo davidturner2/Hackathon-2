@@ -1,6 +1,6 @@
 // headers here ...
 #include "raylib.h"
-#include <algorithm>
+#include <string>
 #include <vector>
 
 using namespace std;
@@ -49,6 +49,7 @@ inline int NUM_EXPLODING_PLUGS; // How many plugs will overheat
 
 // plug colors
 inline Color DANGER_PLUG_COLOR = RED;
+inline string DANGER_PLUG_COLOR_NAME = "red";
 inline Color SAFE_PLUG_COLOR = DARKGRAY;
 const Color WIRE_COLOR = {203, 212, 216, 255}; // Wire line color
 
@@ -93,7 +94,7 @@ enum GameState {
   GAME_LOST_TOO_MANY_MISSED
 };
 
-enum SessionState { SESSION_PLAYING, SESSION_LOST };
+enum SessionState { SESSION_PLAYING, SESSION_LOST, SESSION_GAME_WON };
 
 inline GameState CURRENT_GAME_STATE = GAME_PLAYING;
 inline float CURRENT_TIME_LEFT = 10.0f;
@@ -179,3 +180,4 @@ void UpdateWires(float deltaTime);
 void NextFrame();
 int InitMinigame2();
 SessionState LevelUpIfNeeded();
+void SetDangerPlugColor(string color);

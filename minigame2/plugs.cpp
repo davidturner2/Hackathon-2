@@ -1,6 +1,5 @@
 #include "header.h"
 #include <algorithm>
-#include <cmath>
 #include <cstdlib>
 
 Plugs::Plugs() {

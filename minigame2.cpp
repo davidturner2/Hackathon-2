@@ -9,9 +9,9 @@
 using namespace std;
 
 int minigame2_sample() {
-  srand(static_cast<unsigned int>(time(0)));
   InitWindow(1000, 800, "Minigame 2 Sample");
   SetTargetFPS(30);
+  SetDangerPlugColor("ORANGE");
 
   if (InitMinigame2() != 0)
     return -1;
