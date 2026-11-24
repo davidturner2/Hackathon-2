@@ -1,9 +1,6 @@
 #include "main.h"
 #include "minigame2/header.h"
 #include "raylib.h"
-#include <algorithm>
-#include <cstdlib>
-#include <ctime>
 #include <iostream>
 
 using namespace std;
