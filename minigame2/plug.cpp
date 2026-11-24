@@ -13,12 +13,7 @@ Plug::Plug(int newRow, int newColumn, Side newSide) {
   ignore = false;
   safe = true;
   saved = false;
-
-  if (rand() % 3 == 0) {
-    safe = false;
-    explodeAt = static_cast<float>(
-        MIN_EXPLODE_TIME + rand() % (MAX_EXPLODE_TIME - MIN_EXPLODE_TIME + 1));
-  }
+  expired = false;
 }
 
 // Get the rectangle that represents the plug's position and size on the screen
