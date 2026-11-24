@@ -18,7 +18,7 @@ void DrawGrid() {
 }
 
 float GetFadeAlpha(Plug plug) {
-  if (!plug.ignore) {
+  if (plug.expired || !plug.ignore) {
     return 1.0f;
   }
   return Clamp(1.0f - (plug.tick - plug.resolvedAt) / FADE_DURATION, 0.0f,
@@ -27,10 +27,10 @@ float GetFadeAlpha(Plug plug) {
 
 void DrawPlugs(Plugs plugs) {
   for (const auto &plug : plugs.plugs) {
-    Color plugColor = DARKGRAY;
-    if (!plug.safe) {
-      float heat = Clamp(plug.tick / plug.explodeAt, 0.0f, 1.0f);
-      plugColor = ColorLerp(DARKGRAY, RED, heat);
+    Color plugColor = SAFE_PLUG_COLOR;
+    if (!plug.safe && !plug.ignore) {
+      float progress = Clamp(plug.tick / plug.explodeAt, 0.0f, 1.0f);
+      plugColor = ColorLerp(DANGER_PLUG_COLOR, SAFE_PLUG_COLOR, progress);
     }
     plugColor = Fade(plugColor, GetFadeAlpha(plug));
     DrawRectangleRec(plug.GetPlugRect(), plugColor);
@@ -155,7 +155,7 @@ void DrawShockBar(int x, int y) {
                 height - border * 2, YELLOW);
 }
 
-void DrawHud(float timeLeft, GameState state) {
+void DrawHud() {
   int offsetY = PADDING * 2 + CELL_SIZE * ROWS;
   int textSize = 20;
   DrawText("Minigame 2: Unplug the plugs!", PADDING, offsetY, textSize, WHITE);
@@ -168,18 +168,33 @@ void DrawHud(float timeLeft, GameState state) {
 
   int panelX = MINIGAME_START_X + CELL_SIZE * COLUMNS + PADDING * 2;
   int panelY = MINIGAME_START_Y;
-  DrawText(TextFormat("Time: %.1f", max(timeLeft, 0.0f)), panelX, panelY,
-           textSize, WHITE);
+  DrawText(TextFormat("Time: %.1f", max(CURRENT_TIME_LEFT, 0.0f)), panelX,
+           panelY, textSize, WHITE);
   DrawText("Shock", panelX, panelY + textSize + PADDING, textSize, WHITE);
   DrawShockBar(panelX, panelY + (textSize + PADDING) * 2);
 
-  int resultY = panelY + 120;
-  switch (state) {
+  int totalWires = NUM_PLUGS / 2;
+  int maxAllowedMissed = static_cast<int>(totalWires * FAIL_THRESHOLD_RATIO);
+
+  int statsY = panelY + (textSize + PADDING) * 3 + 20;
+  Color missedColor =
+      (MISSED_CABLES_COUNT > maxAllowedMissed)
+          ? RED
+          : (MISSED_CABLES_COUNT == maxAllowedMissed ? YELLOW : WHITE);
+  DrawText(TextFormat("Missed: %d / %d", MISSED_CABLES_COUNT, maxAllowedMissed),
+           panelX, statsY, textSize, missedColor);
+  DrawText(TextFormat("Total Cables: %d", totalWires), panelX,
+           statsY + textSize + 6, 18, LIGHTGRAY);
+  DrawText(TextFormat("Grid: %dx%d", ROWS, COLUMNS), panelX,
+           statsY + (textSize + 6) * 2, 18, LIGHTGRAY);
+
+  int resultY = statsY + 110;
+  switch (CURRENT_GAME_STATE) {
   case GAME_WON:
     DrawText("All clear, you win!", panelX, resultY, 20, GREEN);
     break;
-  case GAME_LOST_CUT_SAFE:
-    DrawText("You cut a safe wire!", panelX, resultY, 20, RED);
+  case GAME_LOST_TOO_MANY_MISSED:
+    DrawText("Too many cables missed!", panelX, resultY, 20, RED);
     break;
   case GAME_LOST_TIME:
     DrawText("Time ran out!", panelX, resultY, 20, RED);

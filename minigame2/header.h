@@ -157,9 +157,7 @@ void DrawPlugs(Plugs plugs);
 void DrawWires(Plugs plugs);
 void DrawSlices(vector<Slice> slices);
 void DrawShockBar(int x, int y);
-void DrawHud(float timeLeft, GameState state, int missedCables,
-             int maxAllowedMissed, int totalWires);
-void DrawHud(float timeLeft, GameState state);
+void DrawHud();
 
 // Some utility functions
 Vector2 MousePositionToGridPosition(Vector2 mousePosition);
