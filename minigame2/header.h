@@ -149,6 +149,10 @@ public:
   float tick;
 };
 
+Rectangle GridPositionToRectangle(Vector2 gridPosition);
+bool SlashWiresInGridPosition(Plugs &plugs, Vector2 gridPosition);
+void UpdateSlices(vector<Slice> &slices, float deltaTime);
+
 void DrawGrid();
 void DrawPlugs(Plugs plugs);
 void DrawWires(Plugs plugs);
