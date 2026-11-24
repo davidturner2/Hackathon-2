@@ -145,6 +145,7 @@ class Slice {
 public:
   Rectangle cell;
   float tick;
+  Slice(Rectangle newCell, float newTick);
 };
 
 inline Plugs PLUGS;

@@ -1,6 +1,11 @@
 #include "header.h"
 #include "raymath.h"
 
+Slice::Slice(Rectangle newCell, float newTick) {
+  cell = newCell;
+  tick = newTick;
+}
+
 Rectangle GetGridArea() {
   return Rectangle{static_cast<float>(MINIGAME_START_X),
                    static_cast<float>(MINIGAME_START_Y),
