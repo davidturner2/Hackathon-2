@@ -1,38 +1,31 @@
 #include "main.h"
 #include "minigame2/header.h"
 #include "raylib.h"
+#include <algorithm>
 #include <cstdlib>
 #include <ctime>
+#include <iostream>
 
 using namespace std;
 
 int minigame2_sample() {
-  srand(time(0));
   InitWindow(1000, 800, "Minigame 2 Sample");
   SetTargetFPS(30);
+  SetDangerPlugColor("ORANGE");
 
-  setup(9, 9);
-  PLUG = LoadTexture("minigame2/assets/plug.png");
-  if (PLUG.id == 0) {
-    CloseWindow();
+  if (InitMinigame2() != 0)
     return -1;
-  }
-
-  Plugs plugs = Plugs();
-  plugs.GeneratePlugs();
-  plugs.GenerateWires();
 
   while (!WindowShouldClose()) {
-    BeginDrawing();
-    ClearBackground(BLACK);
-
-    DrawGrid();
-    DrawWires(plugs);
-    DrawPlugs(plugs);
-    DrawHud();
-
-    EndDrawing();
+    NextFrame();
+    SessionState sessionState = LevelUpIfNeeded();
+    if (sessionState == SESSION_LOST) {
+      cout << "Game over!" << endl;
+      break;
+    }
   }
 
+  UnloadTexture(PLUG);
+  CloseWindow();
   return 0;
 }
