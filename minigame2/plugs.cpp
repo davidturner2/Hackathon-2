@@ -1,4 +1,6 @@
 #include "header.h"
+#include <algorithm>
+#include <cmath>
 #include <cstdlib>
 
 Plugs::Plugs() {
@@ -83,9 +85,9 @@ void Plugs::UpdatePlugs(float deltaTime) {
   }
 }
 
-// Updates every wire system. Returns how many systems exploded this frame.
+// Updates every wire system. Returns how many systems expired this frame.
 int Plugs::UpdateWires(float deltaTime) {
-  int exploded = 0;
+  int expired = 0;
   for (const auto &wire : wires) {
     Plug &plug1 = plugs[wire.plugIndex1];
     Plug &plug2 = plugs[wire.plugIndex2];
@@ -97,10 +99,10 @@ int Plugs::UpdateWires(float deltaTime) {
 
     if (plug1.tick > plug1.explodeAt) {
       ResolveWire(wire, false);
-      exploded++;
+      expired++;
     }
   }
-  return exploded;
+  return expired;
 }
 
 void Plugs::ResolveWire(Wire wire, bool saved) {
@@ -109,10 +111,12 @@ void Plugs::ResolveWire(Wire wire, bool saved) {
 
   plug1.ignore = true;
   plug1.saved = saved;
+  plug1.expired = !saved;
   plug1.resolvedAt = plug1.tick;
 
   plug2.ignore = true;
   plug2.saved = saved;
+  plug2.expired = !saved;
   plug2.resolvedAt = plug2.tick;
 }
 
