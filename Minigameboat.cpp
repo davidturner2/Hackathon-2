@@ -62,7 +62,6 @@ float easeOutBack(float x) {
     }
 }
 void Minigameboat::update(){
- while (!WindowShouldClose()) {
     BeginDrawing();
     mousePosition = GetMousePosition();
     ClearBackground((Color){100,180,200,255});
@@ -173,16 +172,13 @@ if(resistancecheck!=1){
 // put winnning state
 if(CheckCollisionCircleRec(boatPosition,20,(Rectangle){876,(float)(icebergoffset),50,100})){
     restart();
+    won=true;
 }
 
     //ice berg
     DrawRectangle(876,(float)(icebergoffset),50,100,(Color){ 255, 233, 255, 255 } );
     EndDrawing();
-    }
-
-
-
-
+    
 }
 
 
