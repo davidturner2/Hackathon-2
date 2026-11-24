@@ -6,6 +6,7 @@
 using namespace std;
 
 inline Texture2D PLUG;
+inline float DELTA_TIME;
 
 const int PADDING = 10; // Padding for the UI
 
@@ -170,3 +171,8 @@ bool CohenSutherlandLineClip(double &x0, double &y0, double &x1, double &y1,
                              double xmin, double ymin, double xmax,
                              double ymax);
 Vector2 GetWireHeadPosition(Vector2 center, Side side);
+
+void InputSlices();
+void UpdateWires(float deltaTime);
+void NextFrame();
+int InitMinigame2();

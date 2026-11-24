@@ -142,7 +142,6 @@ void DrawSlices(vector<Slice> slices) {
   }
 }
 
-// The shock bar is two rectangles: the outline and the bar filling it
 void DrawShockBar(int x, int y) {
   int width = 300;
   int height = 24;
@@ -191,7 +190,7 @@ void DrawHud() {
   int resultY = statsY + 110;
   switch (CURRENT_GAME_STATE) {
   case GAME_WON:
-    DrawText("All clear, you win!", panelX, resultY, 20, GREEN);
+    DrawText("You win!", panelX, resultY, 20, GREEN);
     break;
   case GAME_LOST_TOO_MANY_MISSED:
     DrawText("Too many cables missed!", panelX, resultY, 20, RED);
