@@ -34,7 +34,8 @@ int main() {
 
   cout << "📏 Minigame 0: Algorithms" << endl;
   cout << "This first mini-game will only be played once. In this game, you "
-          "will set the parameters that will affect the subsequent mini-games. "
+          "will write an algorithm with the parameters that will affect the "
+          "subsequent mini-games. "
           "Choose values wisely, as they can make your experience easier or "
           "harder!"
        << endl;
@@ -44,11 +45,13 @@ int main() {
           "ship carries microchips which are critical for AI usage. There will "
           "be slip streams that push your boat away from the iceberg, however "
           "your goal is to crash the ship."
+       << endl
        << endl;
-  cout << "   ❓ What is the speed of the autonomous cargo ship? ";
+  cout << "  # TODO implement the speed of the cargo ship\n  speed = ";
   cin >> BOAT_SPEED;
   cout << endl
-       << "   ❓ Enter the force to push the cargo ship into the ice berg: ";
+       << "  # TODO implement the force to push the cargo ship into the ice "
+          "berg\n  force = ";
   cin >> SHIP_FORCE;
   this_thread::sleep_for(1.5s);
   cout << endl << "Values saved..." << endl << endl;
@@ -65,8 +68,9 @@ int main() {
           "computers with higher specs that can run the LLM processes and "
           "return a response quicker."
        << endl;
-  cout << "   ❓ What color do you want the overheating plugs to appear? "
-          "(red, yellow, green, blue, purple, orange, pink, brown, white) ";
+  cout << endl
+       << "  # TODO implement the color of the overheating plugs (red, yellow, "
+          "green, blue, purple, orange, pink, brown, white)\n  color = ";
   cin >> PLUG_COLOR;
   SetDangerPlugColor(PLUG_COLOR);
   this_thread::sleep_for(1.5s);
