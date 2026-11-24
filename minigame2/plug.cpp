@@ -17,8 +17,9 @@ Plug::Plug(int newRow, int newColumn, Side newSide) {
 
   if (rand() % 3 == 0) {
     safe = false;
-    explodeAt = static_cast<float>(
-        MIN_EXPLODE_TIME + rand() % (MAX_EXPLODE_TIME - MIN_EXPLODE_TIME + 1));
+    int minT = static_cast<int>(MIN_EXPLODE_TIME);
+    int maxT = static_cast<int>(MAX_EXPLODE_TIME);
+    explodeAt = static_cast<float>(minT + rand() % (maxT - minT + 1));
   }
 }
 
