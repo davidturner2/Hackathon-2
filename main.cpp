@@ -1,5 +1,6 @@
 #include "main.h"
 #include "minigame2/header.h"
+#include "minigameboat.h"
 #include "raylib.h"
 // Thread + chrono are used to add delays for the first mini-game and works for
 // Windows, Linux, and MacOS without any changes. Plus much neater and allows
@@ -96,53 +97,15 @@ int main() {
   if (InitMinigame2() != 0)
     return -1;
 
-  Vector2 mousePosition;
-  Vector2 boatPosition = {100, 400};
-  Color blue = {120, 240, 200, 255};
-  Rectangle stream = {500, 300, 50, 200};
+    Minigameboat hi = Minigameboat(BOAT_SPEED,SHIP_FORCE);
   // run every frame
   while (!WindowShouldClose()) {
     if (CURRENT_STATE == MINIGAME_1) {
-      BeginDrawing();
-      mousePosition = GetMousePosition();
-      // background color
-      ClearBackground(blue);
-      // position= Vector2MoveTowards(Vector2 v, Vector2 target, float
-      // maxDistance)
-      if (IsMouseButtonDown(0) &&
-          abs(mousePosition.y - boatPosition.y) > 5.1f &&
-          mousePosition.y < 800 && mousePosition.y > 0) {
-        if (mousePosition.y < boatPosition.y) {
-          boatPosition.y -= 120.0f * GetFrameTime();
-        } else {
-          boatPosition.y += 120.0f * GetFrameTime();
-        }
-      }
-      if (boatPosition.x > 1000) {
-        boatPosition.x = -20;
-      }
-
-      // slipstream
-      DrawRectangle(stream.x, stream.y, stream.width, stream.height,
-                    (Color){58, 79, 23, 255});
-
-      // cursor
-      DrawCircle(mousePosition.x, mousePosition.y, 20,
-                 (Color){255, 255, 255, 100});
-
-      // boat
-      DrawCircle(boatPosition.x, boatPosition.y, 20, WHITE);
-
-      if (CheckCollisionCircleRec(boatPosition, 20, stream)) {
-        boatPosition.y -= 100 * GetFrameTime();
-        boatPosition.x += 20.5 * GetFrameTime();
-      } else {
-        boatPosition.x += 70.5 * GetFrameTime();
-      }
-
-      // ice berg
-      DrawRectangle(800, 300, 20, 100, (Color){219, 233, 255, 255});
-      EndDrawing();
+    hi.update();   
+    if(hi.won){
+        CURRENT_STATE=MINIGAME_2;
+        hi.won=false;
+    }
     } else {
       NextFrame();
       SessionState sessionState = LevelUpIfNeeded();
