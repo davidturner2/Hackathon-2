@@ -9,7 +9,7 @@ enum State {
   MINIGAME_1,
   MINIGAME_2,
 };
-State CURRENT_STATE = MINIGAME_2;
+State CURRENT_STATE = MINIGAME_1;
 int MINIGAME_2_ITERATIONS = 0;
 
 int main() {
