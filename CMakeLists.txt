@@ -29,5 +29,6 @@ add_executable(main
     minigame2/clipping.cpp
     minigame2/difficulty.cpp
     minigame2/slice.cpp
+    minigame2/control.cpp
 )
 target_link_libraries(main PRIVATE raylib)

@@ -1,6 +1,13 @@
 #include "header.h"
 #include "raymath.h"
 
+Rectangle GetGridArea() {
+  return Rectangle{static_cast<float>(MINIGAME_START_X),
+                   static_cast<float>(MINIGAME_START_Y),
+                   static_cast<float>(CELL_SIZE * COLUMNS),
+                   static_cast<float>(CELL_SIZE * ROWS)};
+}
+
 Rectangle GridPositionToRectangle(Vector2 gridPosition) {
   float x = MINIGAME_START_X + gridPosition.x * CELL_SIZE;
   float y = MINIGAME_START_Y + gridPosition.y * CELL_SIZE;

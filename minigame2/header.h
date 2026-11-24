@@ -97,7 +97,6 @@ inline float CURRENT_TIME_LEFT = 10.0f;
 inline int MISSED_CABLES_COUNT = 0;
 
 void RestartMinigame2(const DifficultyConfig &config);
-void RestartMinigame2();
 
 class Plug {
 public:
@@ -147,6 +146,11 @@ public:
   Rectangle cell;
   float tick;
 };
+
+inline Plugs PLUGS;
+inline vector<Slice> SLICES;
+
+Rectangle GetGridArea();
 
 Rectangle GridPositionToRectangle(Vector2 gridPosition);
 bool SlashWiresInGridPosition(Plugs &plugs, Vector2 gridPosition);
