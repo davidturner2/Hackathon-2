@@ -1,19 +1,6 @@
 #include "header.h"
 #include "raymath.h"
 
-DifficultyConfig::DifficultyConfig() {
-  rows = 9;
-  columns = 9;
-  dangerRatio = 0.45f;
-  minExplodeTime = 4.0f;
-  maxExplodeTime = 8.0f;
-  gameDuration = 10.0f;
-  shockSafeCut = 30.0f;
-  shockDrainRate = 50.0f;
-  failThresholdRatio = 0.20f;
-  difficultyFactor = 0.5f;
-}
-
 DifficultyConfig::DifficultyConfig(float factor) {
   factor = Clamp(factor, 0.0f, 1.0f);
   difficultyFactor = factor;

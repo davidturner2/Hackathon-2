@@ -13,11 +13,16 @@ int minigame2_sample() {
   InitWindow(1000, 800, "Minigame 2 Sample");
   SetTargetFPS(30);
 
-  InitMinigame2();
-  RestartMinigame2(CURRENT_CONFIG);
+  if (InitMinigame2() != 0)
+    return -1;
 
   while (!WindowShouldClose()) {
     NextFrame();
+    SessionState sessionState = LevelUpIfNeeded();
+    if (sessionState == SESSION_LOST) {
+      cout << "Game over!" << endl;
+      break;
+    }
   }
 
   UnloadTexture(PLUG);

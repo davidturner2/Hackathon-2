@@ -1,4 +1,6 @@
 #include "header.h"
+#include <iostream>
+using namespace std;
 
 void RestartMinigame2(const DifficultyConfig &config) {
   config.Apply();
@@ -51,6 +53,8 @@ int InitMinigame2() {
     CloseWindow();
     return -1;
   }
+  RestartMinigame2(CURRENT_CONFIG);
+  return 0;
 }
 
 void NextFrame() {
@@ -85,4 +89,23 @@ void NextFrame() {
   DrawHud();
 
   EndDrawing();
+}
+
+SessionState LevelUpIfNeeded() {
+  if (CURRENT_GAME_STATE != GAME_PLAYING) {
+    POST_ROUND_TIMER += GetFrameTime();
+
+    if (POST_ROUND_TIMER >= 3.0f) {
+      if (CURRENT_GAME_STATE == GAME_WON) {
+        float difficultyStep = (rand() % 500 + 300) / 10000.0;
+        float nextFactor =
+            min(1.0f, CURRENT_CONFIG.difficultyFactor + difficultyStep);
+        RestartMinigame2(DifficultyConfig(nextFactor));
+        POST_ROUND_TIMER = 0.0f;
+      } else {
+        return SESSION_LOST;
+      }
+    }
+  }
+  return SESSION_PLAYING;
 }

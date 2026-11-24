@@ -7,6 +7,7 @@ using namespace std;
 
 inline Texture2D PLUG;
 inline float DELTA_TIME;
+inline float POST_ROUND_TIMER = 0.0;
 
 const int PADDING = 10; // Padding for the UI
 
@@ -64,13 +65,12 @@ public:
   float failThresholdRatio;
   float difficultyFactor;
 
-  DifficultyConfig();
   DifficultyConfig(float factor);
 
   void Apply() const;
 };
 
-inline DifficultyConfig CURRENT_CONFIG;
+inline DifficultyConfig CURRENT_CONFIG = DifficultyConfig(0.0f);
 
 // Previously we used some math to check if the wire was on the left or right
 // side of the grid, or top or bottom. We decided to use an enum since it can
@@ -92,6 +92,8 @@ enum GameState {
   GAME_LOST_TIME,
   GAME_LOST_TOO_MANY_MISSED
 };
+
+enum SessionState { SESSION_PLAYING, SESSION_LOST };
 
 inline GameState CURRENT_GAME_STATE = GAME_PLAYING;
 inline float CURRENT_TIME_LEFT = 10.0f;
@@ -176,3 +178,4 @@ void InputSlices();
 void UpdateWires(float deltaTime);
 void NextFrame();
 int InitMinigame2();
+SessionState LevelUpIfNeeded();
