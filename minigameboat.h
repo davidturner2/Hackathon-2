@@ -23,6 +23,8 @@ private:
 
     /* data */
 public:
+    bool won=false;
+    bool lose=false;
     void update();
     void restart();
     void SetRandom(int i, int max);
