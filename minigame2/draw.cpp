@@ -161,7 +161,7 @@ void DrawHud() {
 
   // title
   // Convert to char[] since DrawText does not support string
-  DrawText(TextFormat("Minigame 2: Unplug the %s plugs!",
+  DrawText(TextFormat("Unplug the %s plugs.",
                       DANGER_PLUG_COLOR_NAME.c_str()),
            PADDING, offsetY, titleSize, WHITE);
 
@@ -199,7 +199,7 @@ void DrawHud() {
 
   switch (CURRENT_GAME_STATE) {
   case GAME_WON:
-    DrawText("You won this round!", PADDING,
+    DrawText("Data Center Deactivated.", PADDING,
              belowShockBar + (PADDING + textSize) * 2, textSize, GREEN);
     break;
   case GAME_LOST_TOO_MANY_MISSED:

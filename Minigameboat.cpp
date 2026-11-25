@@ -2,7 +2,7 @@
 #include <cmath>
 #include <raymath.h>
 using namespace std;
-
+// shout out to raylib cheatsheet that had a link at the bottom to raymath cheat sheet as well
 Minigameboat::Minigameboat(int bspeed, int bforce)
 {
     // remove softlock
@@ -19,7 +19,7 @@ Minigameboat::Minigameboat(int bspeed, int bforce)
 // and calling itself to run again if its colliding with all other obstacle to make sure they dont overlap
 void Minigameboat::SetRandom(int i, int max, int lol)
 {
-    Rectangle j = {(float)(rand() % 700 + 100), (float)(rand() % 700 + 300), (float)(rand() % 50 + 20), (float)(rand() % 200 + 150)};
+    Rectangle j = {(float)(rand() % 700 + 100), (float)(rand() % 700 - 220), (float)(rand() % 50 + 20), (float)(rand() % 200 + 150)};
     // prevent an actual crash by getting rid of infinte recursion in the scenario all 45 cannot fit without overlapping
     // check if it took 100 tries and get out
     if (lol > 99)
