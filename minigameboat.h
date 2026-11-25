@@ -28,7 +28,7 @@ public:
     bool lose=false;
     void update();
     void restart();
-    void SetRandom(int i, int max);
+    void SetRandom(int i, int max,int lol);
     Minigameboat(int bspeed,int force);
     
 

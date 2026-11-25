@@ -5,7 +5,12 @@ using namespace std;
 
 Minigameboat::Minigameboat(int bspeed,int bforce)
 {
+    // remove softlock
+    if(bspeed<5)
+        boatspeed=5;
+    else
     boatspeed=bspeed;
+
     force = bforce;
     restart();
 }
@@ -13,8 +18,14 @@ Minigameboat::Minigameboat(int bspeed,int bforce)
 
 // recursive method that sets all objects to random positions by calling itself 
 // and calling itself to run again if its colliding with all other obstacle to make sure they dont overlap
-void Minigameboat::SetRandom(int i, int max){
-    Rectangle j = {(float)(rand()%700+100),(float)(rand()%700-300),(float)(rand()%50+20),(float)(rand()%200+200)}; 
+void Minigameboat::SetRandom(int i, int max, int lol){
+    Rectangle j = {(float)(rand()%700+100),(float)(rand()%700+300),(float)(rand()%50+20),(float)(rand()%200+150)}; 
+    // prevent an actual crash by getting rid of infinte recursion in the scenario all 50 cannot fit without overlapping
+    // check if it took over 100 tries and get out
+    if(lol>100){
+        return;
+    }
+
     if(i==max){
     return;
     }else{
@@ -25,7 +36,7 @@ void Minigameboat::SetRandom(int i, int max){
         }
     }
     if(s==1){
-    SetRandom(i,max);
+    SetRandom(i,max,lol+1);
     } else{
     obstacles[i].SetCollider(j);
     int k=(rand()%100+30);
@@ -37,7 +48,7 @@ void Minigameboat::SetRandom(int i, int max){
 k=(rand()%500+30);
     }
     obstacles[i].SetSpeed(k);
-        SetRandom(i+1,max);
+        SetRandom(i+1,max,lol);
 
     }
     }
@@ -47,12 +58,12 @@ k=(rand()%500+30);
 // this sets the stage random amount of objects random positions random ice berg same starting boat position no time to prepare since you are an algorithm you run immeadiltiy
 void Minigameboat::restart(){
     boatPosition = {-10, 400};
-    obc=rand()%50;
+    obc=rand()%49;
     icebergoffset = rand()%345+100;
     for(int i=0;i<obc;i++){
         obstacles[i].resetoffset();
     }
-    SetRandom(0,obc);
+    SetRandom(0,obc,0);
 }
 
 // from easings.net
