@@ -6,8 +6,8 @@ using namespace std;
 Minigameboat::Minigameboat(int bspeed,int bforce)
 {
     // remove softlock
-    if(bspeed<5)
-        boatspeed=5;
+    if(bspeed<16)
+        boatspeed=16;
     else
     boatspeed=bspeed;
 
@@ -21,8 +21,8 @@ Minigameboat::Minigameboat(int bspeed,int bforce)
 void Minigameboat::SetRandom(int i, int max, int lol){
     Rectangle j = {(float)(rand()%700+100),(float)(rand()%700+300),(float)(rand()%50+20),(float)(rand()%200+150)}; 
     // prevent an actual crash by getting rid of infinte recursion in the scenario all 50 cannot fit without overlapping
-    // check if it took over 100 tries and get out
-    if(lol>100){
+    // check if it took 100 tries and get out
+    if(lol>99){
         return;
     }
 
@@ -44,7 +44,7 @@ void Minigameboat::SetRandom(int i, int max, int lol){
     if(n>99){
         k*=-1;
     }
-    if(force>=130){
+    if(force>100){
 k=(rand()%500+30);
     }
     obstacles[i].SetSpeed(k);
