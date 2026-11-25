@@ -123,6 +123,7 @@ int main() {
       }
       if (sessionState == SESSION_GAME_WON) {
         MINIGAME_2_ITERATIONS++;
+        CURRENT_STATE=MINIGAME_1;
       }
     }
   }

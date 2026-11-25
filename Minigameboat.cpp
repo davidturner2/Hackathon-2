@@ -33,6 +33,9 @@ void Minigameboat::SetRandom(int i, int max){
     if(n>99){
         k*=-1;
     }
+    if(force>=130){
+k=(rand()%500+30);
+    }
     obstacles[i].SetSpeed(k);
         SetRandom(i+1,max);
 
@@ -128,8 +131,8 @@ void Minigameboat::update(){
     }
 
     // switch to the lose screen
-    // did you set the speed to fast and you instatntly lost? write it again. 
-    // then youll be writing algorithms like a true computer (mad) scientist. >:)
+    // did you set the speed too fast and you instatntly lost? write it again. 
+    // then youll be writing algorithms like a true computer (or mad) scientist. >:)
     if(boatPosition.x>1000){
         lose=true;
     }
