@@ -252,8 +252,9 @@ int main() {
   this_thread::sleep_for(3s);
   cout << "Seed calculated: " << seed << endl;
   this_thread::sleep_for(1.5s);
-  cout << "Starting mini-games..." << endl;
+  cout << "cat good_luck.jl" << endl;
   this_thread::sleep_for(1.5s);
+  cout << "# You got this..." << endl << endl;
 
   // Starting
   InitWindow(1000, 800, "hackathon example");
