@@ -12,6 +12,7 @@ private:
     float step=0;
     float step2=0;
     float step3=0;
+    float step4=0;
     bool fart=true;
     int icebergoffset = 0;
     float resistance = 1;

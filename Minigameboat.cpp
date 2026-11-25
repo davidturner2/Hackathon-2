@@ -1,5 +1,6 @@
 #include "minigameboat.h"
 #include <cmath>
+#include <raymath.h>
 using namespace std;
 
 Minigameboat::Minigameboat(int bspeed,int bforce)
@@ -69,6 +70,8 @@ void Minigameboat::update(){
     step+=50*GetFrameTime();
     step2+=50*GetFrameTime();
     step3+=50*GetFrameTime();
+    step4+=50*GetFrameTime();
+
     // start moving up or down based on where the mouse is clicking
     Color cursor={255,255,255,67};
     Color boat={200,200,200,255};
@@ -125,8 +128,10 @@ void Minigameboat::update(){
     }
 
     // switch to the lose screen
+    // did you set the speed to fast and you instatntly lost? write it again. 
+    // then youll be writing algorithms like a true computer (mad) scientist. >:)
     if(boatPosition.x>1000){
-        boatPosition.x=-20;
+        lose=true;
     }
     
 
@@ -176,7 +181,16 @@ if(CheckCollisionCircleRec(boatPosition,20,(Rectangle){876,(float)(icebergoffset
 }
 
     //ice berg
-    DrawRectangle(876,(float)(icebergoffset),50,100,(Color){ 255, 233, 255, 255 } );
+    DrawRectangle(876,(float)(icebergoffset),50,100,(Color){ 
+        static_cast<unsigned char>(235+20*sin(step4*0.05)), 
+        233, 
+        static_cast<unsigned char>(240+15*sin(step4*0.03)), 
+        255 } );
+    DrawRectangleLinesEx((Rectangle){876,(float)(icebergoffset),50,100},5,(Color){ 
+        static_cast<unsigned char>(100+100*sin(step4*0.03)), 
+        static_cast<unsigned char>(100+100*sin(step4*0.03)), 
+        static_cast<unsigned char>(100+100*sin(step4*0.03)), 
+        static_cast<unsigned char>(Remap(sin(step4*0.03),-1,1,0,100)) });
     EndDrawing();
     
 }

@@ -106,6 +106,13 @@ int main() {
         CURRENT_STATE=MINIGAME_2;
         hi.won=false;
     }
+    if(hi.lose){
+     
+      cout << "Game over!" << endl;
+      cout << "You reached level: " << MINIGAME_2_ITERATIONS << endl;
+      break;
+      
+    }
     } else {
       NextFrame();
       SessionState sessionState = LevelUpIfNeeded();
