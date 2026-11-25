@@ -3,201 +3,236 @@
 #include <raymath.h>
 using namespace std;
 
-Minigameboat::Minigameboat(int bspeed,int bforce)
+Minigameboat::Minigameboat(int bspeed, int bforce)
 {
-    boatspeed=bspeed;
+    // remove softlock
+    if (bspeed < 16)
+        boatspeed = 16;
+    else
+        boatspeed = bspeed;
+
     force = bforce;
     restart();
 }
 
-
-// recursive method that sets all objects to random positions by calling itself 
+// recursive method that sets all objects to random positions by calling itself
 // and calling itself to run again if its colliding with all other obstacle to make sure they dont overlap
-void Minigameboat::SetRandom(int i, int max){
-    Rectangle j = {(float)(rand()%700+100),(float)(rand()%700-300),(float)(rand()%50+20),(float)(rand()%200+200)}; 
-    if(i==max){
-    return;
-    }else{
-    int s=0;
-    for(int i=0;i<max;i++){
-        if(CheckCollisionRecs(j,obstacles[i].Collider())){
-            s=1;
+void Minigameboat::SetRandom(int i, int max, int lol)
+{
+    Rectangle j = {(float)(rand() % 700 + 100), (float)(rand() % 700 + 300), (float)(rand() % 50 + 20), (float)(rand() % 200 + 150)};
+    // prevent an actual crash by getting rid of infinte recursion in the scenario all 45 cannot fit without overlapping
+    // check if it took 100 tries and get out
+    if (lol > 99)
+    {
+        return;
+    }
+
+    if (i == max)
+    {
+        return;
+    }
+    else
+    {
+        int s = 0;
+        for (int i = 0; i < max; i++)
+        {
+            if (CheckCollisionRecs(j, obstacles[i].Collider()))
+            {
+                s = 1;
+            }
+        }
+        if (s == 1)
+        {
+            SetRandom(i, max, lol + 1);
+        }
+        else
+        {
+            obstacles[i].SetCollider(j);
+            // setting random speed and random direction
+            int k = (rand() % 100 + 30);
+            int n = rand() % 200;
+            if (n > 99)
+            {
+                k *= -1;
+            }
+            // make it harder if a larger force value is chosen
+            if (force > 100)
+            {
+                k = (rand() % 500 + 30);
+            }
+            obstacles[i].SetSpeed(k);
+            SetRandom(i + 1, max, lol);
         }
     }
-    if(s==1){
-    SetRandom(i,max);
-    } else{
-    obstacles[i].SetCollider(j);
-    int k=(rand()%100+30);
-    int n = rand()%200;
-    if(n>99){
-        k*=-1;
-    }
-    if(force>=130){
-k=(rand()%500+30);
-    }
-    obstacles[i].SetSpeed(k);
-        SetRandom(i+1,max);
-
-    }
-    }
-    
 }
 
 // this sets the stage random amount of objects random positions random ice berg same starting boat position no time to prepare since you are an algorithm you run immeadiltiy
-void Minigameboat::restart(){
+void Minigameboat::restart()
+{
     boatPosition = {-10, 400};
-    obc=rand()%50;
-    icebergoffset = rand()%345+100;
-    for(int i=0;i<obc;i++){
+    obc = rand() % 45;
+    icebergoffset = rand() % 345 + 100;
+    for (int i = 0; i < obc; i++)
+    {
         obstacles[i].resetoffset();
     }
-    SetRandom(0,obc);
+    SetRandom(0, obc, 0);
 }
 
 // from easings.net
-float easeOutBack(float x) {
-    if(x<=1.15){
-    const float c1 = 1.70158;
-    const float c3 = c1 + 1;
-    return 1 + c3 * pow(x - 1, 3) + c1 * pow(x - 1, 2);
-    }else{
+float easeOutBack(float x)
+{
+    if (x <= 1.15)
+    {
+        const float c1 = 1.70158;
+        const float c3 = c1 + 1;
+        return 1 + c3 * pow(x - 1, 3) + c1 * pow(x - 1, 2);
+    }
+    else
+    {
         return 1;
     }
 }
-void Minigameboat::update(){
+void Minigameboat::update()
+{
     BeginDrawing();
     mousePosition = GetMousePosition();
-    ClearBackground((Color){100,180,200,255});
-    // frametime thanks to raylib.com example this controls all effects
-    step+=50*GetFrameTime();
-    step2+=50*GetFrameTime();
-    step3+=50*GetFrameTime();
-    step4+=50*GetFrameTime();
+    ClearBackground((Color){100, 180, 200, 255});
+    // Getframetime thanks to raylib.com example this controls all effects
+    step += 50 * GetFrameTime();
+    step2 += 50 * GetFrameTime();
+    step3 += 50 * GetFrameTime();
+    step4 += 50 * GetFrameTime();
 
     // start moving up or down based on where the mouse is clicking
-    Color cursor={255,255,255,67};
-    Color boat={200,200,200,255};
-    Color boat2={200,200,200,255};
+    Color cursor = {255, 255, 255, 67};
+    Color boat = {200, 200, 200, 255};
+    Color boat2 = {200, 200, 200, 255};
 
     // fliping the signal with a local variable and a boolean i declared in the object
-    int signn=1;
-    if(fabs(mousePosition.y-boatPosition.y)>5.1f && mousePosition.y<800 && mousePosition.y>0){
-        if(mousePosition.y<boatPosition.y){
-          signn=1;
-            if(fart==false){
-                step=0;
-                fart=true;
+    int signn = 1;
+    if (fabs(mousePosition.y - boatPosition.y) > 5.1f && mousePosition.y < 800 && mousePosition.y > 0)
+    {
+        if (mousePosition.y < boatPosition.y)
+        {
+            signn = 1;
+            if (fart == false)
+            {
+                step = 0;
+                fart = true;
             }
-        }else{
-            if(fart){
-                step=0;
-                fart=false;
-            }
-            signn=-1;
         }
-    }else{
-    step=0;
+        else
+        {
+            if (fart)
+            {
+                step = 0;
+                fart = false;
+            }
+            signn = -1;
+        }
+    }
+    else
+    {
+        step = 0;
     }
 
     // signal thing to see which direction your going
-    if(step!=0){
-    for(int i=0;i<3;i++){
-    
-        DrawRing((Vector2){boatPosition.x,boatPosition.y+signn*easeOutBack(step*0.035)*(-18-i*5)},15+i,11,0,signn*easeOutBack(step*0.035)*(-180),5,
-        (Color){
-            static_cast<unsigned char>(200-50*easeOutBack(step2*0.05)),
-             static_cast<unsigned char>(50+200*easeOutBack(step2*0.05)),
-            static_cast<unsigned char>(90+50*easeOutBack(step2*0.05)),
-            static_cast<unsigned char>(100-70*sin(step*i*0.05))});
-    }
-    }
+    if (step != 0)
+    {
+        for (int i = 0; i < 3; i++)
+        {
 
-
+            DrawRing((Vector2){boatPosition.x, boatPosition.y + signn * easeOutBack(step * 0.035) * (-18 - i * 5)}, 15 + i, 11, 0, signn * easeOutBack(step * 0.035) * (-180), 5,
+                     (Color){
+                         static_cast<unsigned char>(200 - 50 * easeOutBack(step2 * 0.05)),
+                         static_cast<unsigned char>(50 + 200 * easeOutBack(step2 * 0.05)),
+                         static_cast<unsigned char>(90 + 50 * easeOutBack(step2 * 0.05)),
+                         static_cast<unsigned char>(100 - 70 * sin(step * i * 0.05))});
+        }
+    }
 
     // press button to change some collors and go in the force of the direction
-    if(IsMouseButtonDown(0) && fabs(mousePosition.y-boatPosition.y)>5.1f && mousePosition.y<800 && mousePosition.y>0){
-    cursor={255,190,199,100};
-    step3=0;
-    boat2={static_cast<unsigned char>(200+50*easeOutBack(step2*0.08)),210,200,255};
-    if(mousePosition.y<boatPosition.y){
-        boatPosition.y-=force*1.0f*GetFrameTime();
-    }else{
-           boatPosition.y+=force*1.0f*GetFrameTime();
+    if (IsMouseButtonDown(0) && fabs(mousePosition.y - boatPosition.y) > 5.1f && mousePosition.y < 800 && mousePosition.y > 0)
+    {
+        cursor = {255, 190, 199, 100};
+        step3 = 0;
+        boat2 = {static_cast<unsigned char>(200 + 50 * easeOutBack(step2 * 0.08)), 210, 200, 255};
+        if (mousePosition.y < boatPosition.y)
+        {
+            boatPosition.y -= force * 1.0f * GetFrameTime();
+        }
+        else
+        {
+            boatPosition.y += force * 1.0f * GetFrameTime();
+        }
     }
-    }else{
-        boat2={static_cast<unsigned char>(250-50*easeOutBack(step3*0.05)),200,200,255};
-        step2=0;
+    else
+    {
+        boat2 = {static_cast<unsigned char>(250 - 50 * easeOutBack(step3 * 0.05)), 200, 200, 255};
+        step2 = 0;
     }
 
     // switch to the lose screen
-    // did you set the speed too fast and you instatntly lost? write it again. 
+    // did you set the speed too fast and you instatntly lost? write it again.
     // then youll be writing algorithms like a true computer (or mad) scientist. >:)
-    if(boatPosition.x>1000){
-        lose=true;
+    if (boatPosition.x > 1000)
+    {
+        lose = true;
     }
-    
 
-    //cursor
-    DrawCircle(mousePosition.x,mousePosition.y, 10, cursor);
+    // cursor
+    DrawCircle(mousePosition.x, mousePosition.y, 10, cursor);
 
     // autonomous cargo ship that moves right on its own!!!!!! thats our current reality in the production section on the calculating empires art by kate crawford
     // the algorithm can only affect the y position but those stupid waves are in the way.
-    DrawCircleGradient(boatPosition.x,boatPosition.y, 20,boat,boat2 );
-    DrawCircle(boatPosition.x,boatPosition.y, 5, RED);
+    DrawCircleGradient(boatPosition.x, boatPosition.y, 20, boat, boat2);
+    DrawCircle(boatPosition.x, boatPosition.y, 5, RED);
 
+    // move boat based on the speed and if its colliding with a stream it slows down by 35%
+    boatPosition.x += boatspeed * resistance * GetFrameTime();
 
-    boatPosition.x+=boatspeed*resistance*GetFrameTime();
-
-
-/* i used Inefficient code here that is O(N) where the number of obstacles is N. when i looked up what is effiecent code for detecting collisions for multiple objects i found this forum
-https://stackoverflow.com/questions/41946007/efficient-and-well-explained-implementation-of-a-quadtree-for-2d-collision-det and
-according to https://www.geeksforgeeks.org/dsa/quad-tree/ it would have been O(log N) which doesnt increase as fast as O(N) making it lag less  
-so instead i put it so there can only be a maximum of 50 obstacles becuase i didnt have time to implement 
-a data structure that is beyond the scope of this course and i just learned about big o about a week ago so scrolling through that explantion 
-it reminded me of the binary Insertion sort algorithm we went over in class because its also recursivle dividing but the quadtree seems to recursively divide 2d space*/
-int resistancecheck = 0;
-for(int i=0;i<obc;i++){
-    obstacles[i].update();
-    if(CheckCollisionCircleRec(boatPosition,20,obstacles[i].Collider())){
-        boatPosition.y-=obstacles[i].GetSpeed()*GetFrameTime();
-        // make sure it doesnt go off the screen since the obstacles can make the boat do that
-        if(boatPosition.y<0){
-            boatPosition.y=0;
+    /* i used Inefficient code here that is O(N) where the number of obstacles is N. when i looked up what is effiecent code for detecting collisions for multiple objects i found this forum
+    https://stackoverflow.com/questions/41946007/efficient-and-well-explained-implementation-of-a-quadtree-for-2d-collision-det and
+    according to https://www.geeksforgeeks.org/dsa/quad-tree/ it would have been O(log N) which doesnt increase as fast as O(N) making it lag less
+    so instead i put it so there can only be a maximum of 45 obstacles because i didnt have time to try to learn and implement
+    a data structure that is beyond the scope of this course and i just learned about big o about a week ago so scrolling through that explantion
+    it reminded me of the binary Insertion sort algorithm we went over in class because its also recursivle dividing but the quadtree seems to recursively divide 2d space*/
+    int resistancecheck = 0;
+    for (int i = 0; i < obc; i++)
+    {
+        obstacles[i].update();
+        if (CheckCollisionCircleRec(boatPosition, 20, obstacles[i].Collider()))
+        {
+            boatPosition.y -= obstacles[i].GetSpeed() * GetFrameTime();
+            // make sure it doesnt go off the screen since the obstacles can make the boat do that
+            if (boatPosition.y < 0)
+            {
+                boatPosition.y = 0;
+            }
+            if (boatPosition.y > 800)
+            {
+                boatPosition.y = 800;
+            }
+            resistance = 0.35;
+            resistancecheck = 1;
         }
-        if(boatPosition.y>800){
-            boatPosition.y=800;
-        }
-        resistance=0.321;
-        resistancecheck=1;
     }
-}
-// go back to normal speed
-if(resistancecheck!=1){
-    resistance=1;
-}
+    // go back to normal speed
+    if (resistancecheck != 1)
+    {
+        resistance = 1;
+    }
 
-// put winnning state
-if(CheckCollisionCircleRec(boatPosition,20,(Rectangle){876,(float)(icebergoffset),50,100})){
-    restart();
-    won=true;
-}
+    // put winnning state
+    if (CheckCollisionCircleRec(boatPosition, 20, (Rectangle){876, (float)(icebergoffset), 50, 100}))
+    {
+        restart();
+        won = true;
+    }
 
-    //ice berg
-    DrawRectangle(876,(float)(icebergoffset),50,100,(Color){ 
-        static_cast<unsigned char>(235+20*sin(step4*0.05)), 
-        233, 
-        static_cast<unsigned char>(240+15*sin(step4*0.03)), 
-        255 } );
-    DrawRectangleLinesEx((Rectangle){876,(float)(icebergoffset),50,100},5,(Color){ 
-        static_cast<unsigned char>(100+100*sin(step4*0.03)), 
-        static_cast<unsigned char>(100+100*sin(step4*0.03)), 
-        static_cast<unsigned char>(100+100*sin(step4*0.03)), 
-        static_cast<unsigned char>(Remap(sin(step4*0.03),-1,1,0,100)) });
+    // ice berg
+    DrawRectangle(876, (float)(icebergoffset), 50, 100, (Color){static_cast<unsigned char>(235 + 20 * sin(step4 * 0.05)), 233, static_cast<unsigned char>(240 + 15 * sin(step4 * 0.03)), 255});
+    DrawRectangleLinesEx((Rectangle){876, (float)(icebergoffset), 50, 100}, 5, (Color){static_cast<unsigned char>(100 + 100 * sin(step4 * 0.03)), static_cast<unsigned char>(100 + 100 * sin(step4 * 0.03)), static_cast<unsigned char>(100 + 100 * sin(step4 * 0.03)), static_cast<unsigned char>(Remap(sin(step4 * 0.03), -1, 1, 0, 100))});
     EndDrawing();
-    
 }
-
-
-
-
