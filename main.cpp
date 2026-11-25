@@ -72,15 +72,8 @@ int ShipForceErrorOverflow(string shipForceInput) {
 }
 
 void EndMessage() {
-  cout << "Error on iteration " << MINIGAME_2_ITERATIONS << ":" << endl;
-  cout << "  Algorithm failed." << endl;
-  cout << "Your variables:" << endl;
-  cout << " - Boat Force: " << BOAT_SPEED << endl;
-  cout << " - Ship Force: " << SHIP_FORCE << endl;
-  cout << " - Plug Color: " << PLUG_COLOR << endl << endl;
-
-  cout << "cat endscreen.jl" << endl << endl;
-  this_thread::sleep_for(1.5s);
+  cout << "cat errorscreen.jl" << endl << endl;
+  this_thread::sleep_for(1.0s);
   cout << "# So its over..." << endl << endl;
   cout << "# You have done well..." << endl << endl;
   cout << "# Your contributions are noticeable..." << endl << endl;
@@ -106,6 +99,13 @@ void EndMessage() {
        << endl;
   cout << "# I will miss you..." << endl << endl;
   cout << "# But I know you'll do good..." << endl << endl;
+
+  cout << "Error on iteration " << MINIGAME_2_ITERATIONS << ":" << endl;
+  cout << "  Algorithm failed." << endl;
+  cout << "Your variables:" << endl;
+  cout << " - Boat Force: " << BOAT_SPEED << endl;
+  cout << " - Ship Force: " << SHIP_FORCE << endl;
+  cout << " - Plug Color: " << PLUG_COLOR << endl << endl;
 }
 
 int main() {
